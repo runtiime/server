@@ -1,0 +1,43 @@
+spring:
+  config:
+    import: "optional:dotenv:"
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        open-in-view: false
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:30MB}
+      max-request-size: ${MAX_REQUEST_SIZE:30MB}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION}
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /docs/swagger
+    server:
+      local: ${LOCAL_SERVER_URL:http://localhost:8080}
+      main: ${MAIN_SERVER_URL}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.example: ${LOG_LEVEL_COM_EXAMPLE:DEBUG}
+
