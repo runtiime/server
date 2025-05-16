@@ -31,8 +31,8 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/auth/**",
                         "/login",   // kakao 회원 가입 위한 외부인의 최초 접근 엔드포인트
-                        "/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**"
-                        "bot/chat", "bot/chat/**"   // gpt api 
+                        "/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**",
+                        "bot/chat", "bot/chat/**"   // gpt api
                 ).permitAll()
 
                 // 관리자 전용
