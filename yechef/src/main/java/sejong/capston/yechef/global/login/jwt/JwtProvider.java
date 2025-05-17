@@ -23,7 +23,7 @@ public class JwtProvider {
     private final Key KEY;
     private final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
 
-    public JwtProvider(@Value("${jwt.secret}") String secret) {
+    public JwtProvider(@Value("${JWT_SECRET}") String secret) {
         this.KEY = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
