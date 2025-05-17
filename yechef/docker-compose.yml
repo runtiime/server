@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -10,7 +9,6 @@ services:
       MYSQL_DATABASE:      ${DB_NAME}
     volumes:
       - mysql-data:/var/lib/mysql
-    # 준비 완료 체크
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u ${DB_USER} -p${DB_PASSWORD}"]
       interval: 10s
@@ -25,11 +23,11 @@ services:
       context: .
     env_file:
       - .env
+    # Spring 환경변수를 .env에서 그대로 참조
     environment:
-      SPRING_DATASOURCE_URL:      jdbc:mysql://mysql:3306/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul
-      SPRING_DATASOURCE_USERNAME: ${DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-    # mysql 서비스가 healthy 상태가 된 후 실행
+      SPRING_DATASOURCE_URL: "${SPRING_DATASOURCE_URL}"
+      SPRING_DATASOURCE_USERNAME: "${SPRING_DATASOURCE_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${SPRING_DATASOURCE_PASSWORD}"
     depends_on:
       mysql:
         condition: service_healthy

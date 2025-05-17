@@ -25,13 +25,24 @@ spring:
   jwt:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION}
+
+  kakao:
+    client-id: ${REST_API_KEY}
+    redirect-uri: http://43.203.72.240:8080/auth/login/code/kakao
+    scope: profile_nickname
+    authorization-uri: https://kauth.kakao.com/oauth/authorize
+    token-uri: https://kauth.kakao.com/oauth/token
+    user-info-uri: https://kapi.kakao.com/v2/user/me
+
 springdoc:
   api-docs:
     enabled: true
     path: /v3/api-docs
   swagger-ui:
     enabled: true
-    path: /docs/swagger
+    config-url: /v3/api-docs/swagger-config
+    url: /v3/api-docs
+    path: /swagger-ui
     server:
       local: ${LOCAL_SERVER_URL:http://localhost:8080}
       main: ${MAIN_SERVER_URL}
