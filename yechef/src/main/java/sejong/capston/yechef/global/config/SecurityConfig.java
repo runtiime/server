@@ -1,10 +1,6 @@
 package sejong.capston.yechef.global.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +21,8 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()) // CSRF 비활성화 (쿠키 기반 인증에서는 CSRF 보호 필요할 수도 있음)
+        http.cors(withDefaults())
+            .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (쿠키 기반 인증에서는 CSRF 보호 필요할 수도 있음)
             .cors(withDefaults())
             .formLogin((auth) -> auth.disable())
             .httpBasic((auth) -> auth.disable())
@@ -38,7 +35,7 @@ public class SecurityConfig {
                         "/auth/**",
                         "/login",   // kakao 회원 가입 위한 외부인의 최초 접근 엔드포인트
                         "/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**",
-                        "bot/chat", "bot/chat/**",  // gpt api
+                        "/bot", "/bot/**",  // gpt api
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 ).permitAll()
