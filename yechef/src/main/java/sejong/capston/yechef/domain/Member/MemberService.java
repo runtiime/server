@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sejong.capston.yechef.domain.util.exception.CustomException;
-import sejong.capston.yechef.domain.util.exception.ErrorCode;
+import sejong.capston.yechef.domain.Member.repository.MemberRepository;
+import sejong.capston.yechef.global.exception.BaseException;
+import sejong.capston.yechef.global.exception.error.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class MemberService {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> {
           log.error("회원 조회 실패: memberId: {}", memberId);
-          return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+          return BaseException.from(ErrorCode.MEMBER_NOT_FOUND);
         });
     log.info("회원 정보 조회 성공: userId: {}", memberId);
     return MemberDTO.builder()
