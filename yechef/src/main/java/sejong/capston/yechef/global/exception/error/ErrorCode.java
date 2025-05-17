@@ -9,8 +9,8 @@ public enum ErrorCode {
 
     //client error : 4xx
 
-    //user
-    USER_NOT_FOUND("USR-0000", "해당 회원이 존재하지 않습니다.", ErrorDisplayType.POPUP),
+    //member
+    MEMBER_NOT_FOUND("MEM-0000", "해당 회원이 존재하지 않습니다.", ErrorDisplayType.POPUP),
 
     //kakao Error
     KAKAO_CONFIG_MISSING("KAKAO-0000", "카카오 로그인 설정 오류 발생.", ErrorDisplayType.HIDE),
