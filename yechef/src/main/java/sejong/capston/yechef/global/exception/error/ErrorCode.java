@@ -23,8 +23,11 @@ public enum ErrorCode {
     INVALID_JWT_TOKEN("JWT-0001", "잘못된 JWT 형식입니다.", ErrorDisplayType.HIDE),
 
     //auth
-    UNAUTHORIZED_REQUEST("auth-0000", "인증이 필요한 요청입니다", ErrorDisplayType.HIDE);
+    UNAUTHORIZED_REQUEST("auth-0000", "인증이 필요한 요청입니다", ErrorDisplayType.HIDE),
 
+    //gpt
+    GPT_RESPONSE_PARSING_FAILED("GPT-0000", "GPT 응답 파싱에 실패했습니다.", ErrorDisplayType.TOAST)
+    ;
 
     private final String code;
     private final String message;
