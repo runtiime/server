@@ -1,5 +1,6 @@
 package sejong.capston.yechef.global.config;
 
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -14,7 +15,9 @@ public class CorsConfig {
     CorsConfiguration config = new CorsConfiguration();
     config.addAllowedOriginPattern("*");
     config.addAllowedMethod("*");
-    config.addAllowedHeader("*");
+
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);
     config.setMaxAge(3600L);
 
@@ -22,4 +25,3 @@ public class CorsConfig {
     source.registerCorsConfiguration("/**", config);
     return source;
   }
-}

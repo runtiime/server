@@ -1,6 +1,10 @@
 package sejong.capston.yechef.global.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,8 +39,10 @@ public class SecurityConfig {
                         "/login",   // kakao 회원 가입 위한 외부인의 최초 접근 엔드포인트
                         "/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**",
                         "bot/chat", "bot/chat/**",  // gpt api
-                        "/docs/swagger-ui/**"
+                        "/docs/swagger-ui/**",
+                        "/v3/api-docs/**"
                 ).permitAll()
+
 
                 // 관리자 전용
                 .requestMatchers("/admin").hasRole("ADMIN")
