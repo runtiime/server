@@ -27,7 +27,7 @@ public class LoginService {
         log.info("카카오 Access Token : {} ", accessToken);
 
         // 카카오 유저 정보 요청
-        KakaoResponseDto userInfo = kakaoOAuthService.getUserInfoFromToken(accessToken);
+        KakaoResponseDto userInfo = kakaoOAuthService.getMemberInfoFromToken(accessToken);
         log.info("카카오 유저 정보 : {} ", userInfo);
 
         // 로그인 or 회원가입
