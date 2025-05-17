@@ -45,7 +45,7 @@ public class MemberService {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
 
-    member.update(updateDto.getNickname(), updateDto.getEmail());
+    member.update(updateDto.getNickname(), updateDto.getEmail(), updateDto.isShowExamplePhoto());
     log.info("회원 정보 수정 성공: id: {}", memberId);
     return toDto(member);
   }

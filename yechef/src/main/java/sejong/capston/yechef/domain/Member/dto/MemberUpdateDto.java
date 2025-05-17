@@ -6,4 +6,5 @@ import lombok.Data;
 public class MemberUpdateDto {
   private String nickname;
   private String email;
+  private boolean showExamplePhoto;
 }
