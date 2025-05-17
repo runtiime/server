@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0
@@ -6,11 +7,11 @@ services:
       - .env
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE:      ${DB_NAME}
+      MYSQL_DATABASE: ${DB_NAME}
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u ${DB_USER} -p${DB_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p${DB_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,11 +20,9 @@ services:
       - backend_network
 
   app:
-    build:
-      context: .
+    image: username0516/yechef-app:latest  # ← GitHub Actions에서 push한 이미지
     env_file:
       - .env
-    # Spring 환경변수를 .env에서 그대로 참조
     environment:
       SPRING_DATASOURCE_URL: "${SPRING_DATASOURCE_URL}"
       SPRING_DATASOURCE_USERNAME: "${SPRING_DATASOURCE_USERNAME}"
