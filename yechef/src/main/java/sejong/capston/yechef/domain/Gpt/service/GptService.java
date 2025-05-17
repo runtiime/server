@@ -72,5 +72,17 @@ public class GptService {
             throw BaseException.from(ErrorCode.GPT_RESPONSE_PARSING_FAILED);
         }
     }
+
+    public String simplePrompt(String prompt) {
+        List<Message> messages = List.of(
+            new Message("system", "당신은 요리 보조 도우미입니다. 사용자 입력에 따라 적절한 답변만 출력하세요."),
+            new Message("user", prompt)
+        );
+
+        ChatGPTRequest request = new ChatGPTRequest(model, messages);
+        ChatGPTResponse response = restTemplate.postForObject(apiUrl, request, ChatGPTResponse.class);
+        return response.getChoices().get(0).getMessage().getContent().trim();
+    }
+
 }
 
