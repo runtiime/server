@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # 또는 배포 브랜치 이름
+      - develop
 
 jobs:
   deploy:
