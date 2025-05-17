@@ -36,6 +36,6 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/yechef-app     
-            docker compose -f ~/yechef/docker-compose.yml down
-            docker compose -f ~/yechef/docker-compose.yml up -d
+            docker compose -f /home/ec2-user/server/yechef/docker-compose.yml down
+            docker compose -f /home/ec2-user/server/yechef/docker-compose.yml up -d
 
