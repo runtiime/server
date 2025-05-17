@@ -3,6 +3,7 @@ package sejong.capston.yechef.domain.Gpt.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,6 +17,7 @@ import sejong.capston.yechef.global.exception.error.ErrorCode;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class GptService {
     private final RestTemplate restTemplate;
@@ -66,6 +68,7 @@ public class GptService {
         try {
             return objectMapper.readValue(content, RecipeAnalysisResponseDto.class);
         } catch (JsonProcessingException e) {
+            log.error("GPT 응답 내용을 파싱하는 데 실패했습니다.: {}", content, e);
             throw BaseException.from(ErrorCode.GPT_RESPONSE_PARSING_FAILED);
         }
     }
