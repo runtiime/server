@@ -14,7 +14,7 @@ import sejong.capston.yechef.global.login.service.KakaoOAuthService;
 import sejong.capston.yechef.domain.Member.service.LoginService;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "로그인/회원가입", description = "로그인 api")
@@ -32,7 +32,7 @@ public class LoginController {
     }
 
     @KakaoLoginApi
-    @GetMapping(value = "auth/login/code/kakao")
+    @GetMapping(value = "/login/code/kakao")
     public ResponseEntity<LoginResultDto> kakaoLogin(@RequestParam String code) {
         if(code == null) {
             throw BaseException.from(ErrorCode.KAKA0_CODE_REQUEST_FAILED);
