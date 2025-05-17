@@ -15,7 +15,6 @@ import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.domain.Member.dto.LoginMemberDto;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 @Slf4j
@@ -42,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (token != null && jwtProvider.validateToken(token)) {
 
-                LoginMemberDto jwtLoginMemberDto = jwtProvider.getUserDto(token);
+                LoginMemberDto jwtLoginMemberDto = jwtProvider.getMemberDto(token);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         jwtLoginMemberDto, null, jwtLoginMemberDto.getAuthorities());

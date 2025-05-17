@@ -30,7 +30,7 @@ public class JwtProvider {
     // JWT 생성
     public String createAccessToken(LoginMemberDto loginMemberDto) {
         Claims claims = Jwts.claims();
-        claims.put("userId", loginMemberDto.getId());
+        claims.put("memberId", loginMemberDto.getId());
         claims.put("username", loginMemberDto.getUsername());
         claims.put("role", loginMemberDto.getRole());
         return Jwts.builder()
@@ -56,15 +56,15 @@ public class JwtProvider {
     }
 
     // JWT에서 사용자 ID 추출
-    public Long getUserIdFromToken(String token) {
+    public Long getmemberIdFromToken(String token) {
         Claims claims = parseClaims(token);
-        return claims.get("userId", Long.class);
+        return claims.get("memberId", Long.class);
     }
 
     //JWT에서 사용자 이름 추출
-    public String getUsernameFromToken(String token) {
+    public String getNicknameFromToken(String token) {
         Claims claims = parseClaims(token);
-        return claims.get("username", String.class);
+        return claims.get("nickname", String.class);
     }
 
     //JWT에서 사용자 권한 추출
@@ -75,10 +75,10 @@ public class JwtProvider {
     }
 
     //JWT에서 userDto 추출
-    public LoginMemberDto getUserDto(String token) {
+    public LoginMemberDto getMemberDto(String token) {
         return LoginMemberDto.fromJwt(
-                getUserIdFromToken(token),
-                getUsernameFromToken(token),
+                getmemberIdFromToken(token),
+                getNicknameFromToken(token),
                 getRoleFromToken(token)
         );
     }

@@ -57,7 +57,7 @@ public class KakaoOAuthService {
         }
     }
 
-    public KakaoResponseDto getUserInfoFromToken(String accessToken) {
+    public KakaoResponseDto getMemberInfoFromToken(String accessToken) {
         String url = kakaoConfig.getUser_info_uri();
         KakaoResponseDto kakaoResponseDto = null;
 
@@ -72,11 +72,11 @@ public class KakaoOAuthService {
 
             // JSON 응답 파싱
             JsonNode root = objectMapper.readTree(response.getBody());
-            String username = root.path("properties").path("nickname").asText();
+            String nickname = root.path("properties").path("nickname").asText();
             Long oauthId = root.path("id").asLong();
 
             // 사용자 정보 저장
-            kakaoResponseDto = new KakaoResponseDto(oauthId,username);
+            kakaoResponseDto = new KakaoResponseDto(oauthId,nickname);
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("카카오 API 호출 실패 - 서버 오류: {}", e.getMessage());
