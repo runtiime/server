@@ -37,4 +37,10 @@ public class Member extends BaseEntity {
     this.oauthId = oauthId;
     this.role = role;
   }
+
+  public void update(String nickname, String email) {
+    this.nickname = nickname;
+    this.email = email;
+  }
+
 }

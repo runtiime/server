@@ -1,5 +1,6 @@
 package sejong.capston.yechef.global.config;
 
+import static org.springframework.security.config.Customizer.withDefaults;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // CSRF 비활성화 (쿠키 기반 인증에서는 CSRF 보호 필요할 수도 있음)
+            .cors(withDefaults())
             .formLogin((auth) -> auth.disable())
             .httpBasic((auth) -> auth.disable())
             .exceptionHandling(e ->
