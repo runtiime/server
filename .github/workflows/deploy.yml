@@ -25,7 +25,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/yechef-app ./yechef
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/yechef-app .   
           docker push ${{ secrets.DOCKER_USERNAME }}/yechef-app
 
       - name: Deploy to EC2 via SSH
@@ -35,7 +35,6 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd yechef
-            docker pull ${{ secrets.DOCKER_USERNAME }}/yechef-app
+            docker pull ${{ secrets.DOCKER_USERNAME }}/yechef-app     
             docker compose down
             docker compose up -d
