@@ -21,10 +21,10 @@ public class CustomBotController {
 
     private final GptService gptService;
 
-    @Value("${openai.model}")
+    @Value("${OPENAI_MODEL}")
     private String model;
 
-    @Value("${openai.api.url}")
+    @Value("${OPENAI_API_URL}")
     private String apiURL;
 
     @Autowired

@@ -21,8 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GptService {
     private final RestTemplate restTemplate;
-    @Value("${openai.model}")      private String    model;
-    @Value("${openai.api.url}")    private String    apiUrl;
+    @Value("${OPENAI_MODEL}")      private String    model;
+    @Value("${OPENAI_API_URL}")    private String    apiUrl;
     private final ObjectMapper      objectMapper = new ObjectMapper();
 
     public RecipeAnalysisResponseDto analyzeRecipe(String rawRecipe) {
