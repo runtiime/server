@@ -35,6 +35,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
+            cd ~/yechef
             docker pull ${{ secrets.DOCKER_USERNAME }}/yechef-app     
             docker compose down
             docker compose up -d
