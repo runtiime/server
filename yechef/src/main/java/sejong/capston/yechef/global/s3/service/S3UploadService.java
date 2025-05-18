@@ -23,7 +23,8 @@ public class S3UploadService {
   private final S3Client s3Client;
   private final ImageRepository imageRepository;
 
-  private static final String BUCKET_NAME = "yeojung-bucket";
+  private final String bucketName;
+  private final String bucketName;
   private static final String REGION = "ap-northeast-2";
 
   /**
