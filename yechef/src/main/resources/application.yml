@@ -54,6 +54,8 @@ logging:
 
 cloud:
   aws:
+    s3:
+      bucket: yeojung-bucket
     region:
       static: ap-northeast-2
     credentials:
