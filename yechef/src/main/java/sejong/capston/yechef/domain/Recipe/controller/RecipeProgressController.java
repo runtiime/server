@@ -1,0 +1,33 @@
+package sejong.capston.yechef.domain.Recipe.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import sejong.capston.yechef.domain.Recipe.dto.RecipeStepResponseDto;
+import sejong.capston.yechef.domain.Recipe.dto.VoiceInputDto;
+import sejong.capston.yechef.domain.Recipe.service.RecipeProgressService;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/members/{memberId}/recipes")
+public class RecipeProgressController {
+
+  private final RecipeProgressService progressService;
+
+  @PostMapping("/{recipeId}/step/{stepNumber}/progress")
+  public ResponseEntity<RecipeStepResponseDto> progressStep(
+      @PathVariable Long memberId,
+      @PathVariable Long recipeId,
+      @PathVariable int stepNumber,
+      @RequestBody VoiceInputDto input
+  ) {
+    return ResponseEntity.ok(
+        progressService.processStep(recipeId, stepNumber, input.getText())
+    );
+  }
+}
+
