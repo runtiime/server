@@ -52,3 +52,7 @@ logging:
     root: ${LOG_LEVEL:INFO}
     com.example: ${LOG_LEVEL_COM_EXAMPLE:DEBUG}
 
+cloud:
+  aws:
+    s3:
+      bucket: yeojung-bucket
