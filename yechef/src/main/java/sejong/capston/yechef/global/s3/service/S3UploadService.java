@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sejong.capston.yechef.domain.Recipe.Image;
@@ -23,19 +24,22 @@ public class S3UploadService {
   private final S3Client s3Client;
   private final ImageRepository imageRepository;
 
-  private final String bucketName;
-  private final String bucketName;
+  @Value("${cloud.aws.s3.bucket}")
+  private String bucketName;
+
+  @Value("${cloud.aws.region.static}")
+  private String region;
 
   /**
    * S3에 파일 업로드 후 URL 반환
    */
   public String uploadFile(MultipartFile file) {
     String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-    String fileUrl = "https://" + BUCKET_NAME + ".s3." + s3Client.region().id() + ".amazonaws.com/" + fileName;
+    String fileUrl = "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
 
     try (InputStream inputStream = file.getInputStream()) {
       PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-          .bucket(BUCKET_NAME)
+          .bucket(bucketName)
           .key(fileName)
           .contentType(file.getContentType())
           .acl(ObjectCannedACL.PUBLIC_READ)
