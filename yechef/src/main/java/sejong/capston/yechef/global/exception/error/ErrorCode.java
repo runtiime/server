@@ -26,7 +26,11 @@ public enum ErrorCode {
     UNAUTHORIZED_REQUEST("auth-0000", "인증이 필요한 요청입니다", ErrorDisplayType.HIDE),
 
     //gpt
-    GPT_RESPONSE_PARSING_FAILED("GPT-0000", "GPT 응답 파싱에 실패했습니다.", ErrorDisplayType.TOAST)
+    GPT_RESPONSE_PARSING_FAILED("GPT-0000", "GPT 응답 파싱에 실패했습니다.", ErrorDisplayType.TOAST),
+
+    //s3
+    FILE_UPLOAD_FAIL("S3_001", "파일 업로드에 실패했습니다.", ErrorDisplayType.TOAST)
+
     ;
 
     private final String code;

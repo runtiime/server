@@ -52,3 +52,10 @@ logging:
     root: ${LOG_LEVEL:INFO}
     com.example: ${LOG_LEVEL_COM_EXAMPLE:DEBUG}
 
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
