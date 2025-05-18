@@ -25,14 +25,13 @@ public class S3UploadService {
 
   private final String bucketName;
   private final String bucketName;
-  private static final String REGION = "ap-northeast-2";
 
   /**
    * S3에 파일 업로드 후 URL 반환
    */
   public String uploadFile(MultipartFile file) {
     String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-    String fileUrl = "https://" + BUCKET_NAME + ".s3." + REGION + ".amazonaws.com/" + fileName;
+    String fileUrl = "https://" + BUCKET_NAME + ".s3." + s3Client.region().id() + ".amazonaws.com/" + fileName;
 
     try (InputStream inputStream = file.getInputStream()) {
       PutObjectRequest putObjectRequest = PutObjectRequest.builder()
