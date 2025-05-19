@@ -23,21 +23,21 @@ public class RecipeController {
   private final RecipeService recipeService;
 
   @PostMapping
-  public ResponseEntity<RecipeDto> createRecipe(
+  public RecipeDto createRecipe(
       @PathVariable Long memberId,
       @RequestBody RecipeCreateDto dto
   ) {
-    return ResponseEntity.ok(recipeService.create(memberId, dto));
+    return recipeService.create(memberId, dto);
   }
 
   @GetMapping
-  public ResponseEntity<List<RecipeDto>> getMyRecipes(@PathVariable Long memberId) {
-    return ResponseEntity.ok(recipeService.getMyRecipes(memberId));
+  public List<RecipeDto> getMyRecipes(@PathVariable Long memberId) {
+    return recipeService.getMyRecipes(memberId);
   }
 
   @GetMapping("/{recipeId}")
-  public ResponseEntity<RecipeDto> getRecipe(@PathVariable Long recipeId) {
-    return ResponseEntity.ok(recipeService.getRecipe(recipeId));
+  public RecipeDto getRecipe(@PathVariable Long memberId, @PathVariable Long recipeId) {
+    return recipeService.getRecipe(recipeId);
   }
 
   @DeleteMapping("/{recipeId}")
