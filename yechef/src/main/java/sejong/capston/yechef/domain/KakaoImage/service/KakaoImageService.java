@@ -8,6 +8,9 @@ import sejong.capston.yechef.domain.KakaoImage.dto.KakaoImageResponseDto;
 import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 @Service
 @RequiredArgsConstructor
 public class KakaoImageService {
@@ -41,7 +44,7 @@ public class KakaoImageService {
    * 검색 키워드를 보강하고, 필터링된 이미지 중 가장 상단 URL 반환
    */
   public String getTopImageUrl(String keyword) {
-    String enhancedQuery = keyword; // 키워드 보강 가능
+    String enhancedQuery = keyword;
 
     KakaoImageResponseDto response = searchImage(enhancedQuery);
 
@@ -55,7 +58,8 @@ public class KakaoImageService {
   /**
    * 유효 이미지 필터링 기준:
    * - 쇼핑몰/블로그/스마트스토어 등 상업적 이미지 제외
-   * - 썸네일 또는 텍스트 이미지 URL 제거
+   * - 썸네일, 벡터 아이콘 등 제외
+   * - 접근 가능한 이미지 URL만 허용
    */
   private boolean isValidImage(String siteName, String imageUrl) {
     if (siteName == null || imageUrl == null) return false;
@@ -63,11 +67,30 @@ public class KakaoImageService {
     String lowerSite = siteName.toLowerCase();
     String lowerUrl = imageUrl.toLowerCase();
 
-    return !lowerSite.contains("blog")
-        && !lowerSite.contains("쇼핑")
-        && !lowerUrl.contains("smartstore")
-        && !lowerUrl.contains("shopping")
-        && !lowerUrl.contains("thumbnail")
-        && !lowerUrl.endsWith(".svg"); // 아이콘, 벡터 이미지 제거
+    boolean isClean =
+        !lowerSite.contains("blog") &&
+            !lowerSite.contains("쇼핑") &&
+            !lowerUrl.contains("smartstore") &&
+            !lowerUrl.contains("shopping") &&
+            !lowerUrl.contains("thumbnail") &&
+            !lowerUrl.endsWith(".svg");
+
+    return isClean && isImageUrlAccessible(imageUrl);
+  }
+
+  /**
+   * 이미지 URL에 HEAD 요청을 보내 접근 가능한지 확인
+   */
+  private boolean isImageUrlAccessible(String imageUrl) {
+    try {
+      HttpURLConnection conn = (HttpURLConnection) new URL(imageUrl).openConnection();
+      conn.setRequestMethod("HEAD");
+      conn.setConnectTimeout(1500);
+      conn.setReadTimeout(1500);
+      int code = conn.getResponseCode();
+      return (200 <= code && code < 400); // OK or redirect
+    } catch (Exception e) {
+      return false;
+    }
   }
 }
