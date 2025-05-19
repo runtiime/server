@@ -44,11 +44,16 @@ public class MemberRecipe extends BaseEntity {
     this.isLiked = !this.isLiked;
   }
 
+  @NonNull
+  private Boolean isOwner = false;
+
+
   @Builder
-  public MemberRecipe(Member member, Recipe recipe) {
+  public MemberRecipe(Member member, Recipe recipe, Boolean isLiked, Boolean isOwner) {
     this.member = member;
     this.recipe = recipe;
-    this.isLiked = false;
+    this.isLiked = isLiked != null ? isLiked : false;
+    this.isOwner = isOwner != null ? isOwner : false;
   }
 
 }
