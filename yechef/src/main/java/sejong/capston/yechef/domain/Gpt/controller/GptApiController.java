@@ -3,21 +3,18 @@ package sejong.capston.yechef.domain.Gpt.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import sejong.capston.yechef.domain.Gpt.dto.ChatGPTRequest;
-import sejong.capston.yechef.domain.Gpt.dto.ChatGPTResponse;
-import sejong.capston.yechef.domain.Gpt.dto.RecipeAnalysisResponseDto;
+import sejong.capston.yechef.domain.Gpt.dto.IngredientAndRecipeDto;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/bot")
-public class CustomBotController {
+public class GptApiController {
 
     private final GptService gptService;
 
@@ -31,7 +28,7 @@ public class CustomBotController {
     private RestTemplate template;
 
     @GetMapping("/parseRecipe")
-    public RecipeAnalysisResponseDto parseRecipe(@RequestParam("recipe") String rawRecipe) {
-        return gptService.analyzeRecipe(rawRecipe);
+    public IngredientAndRecipeDto parseRecipe(@RequestParam("recipe") String rawRecipe) {
+        return gptService.parseRecipe(rawRecipe);
     }
 }
