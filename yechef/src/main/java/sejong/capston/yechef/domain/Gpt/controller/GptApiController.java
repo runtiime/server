@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import sejong.capston.yechef.domain.Gpt.dto.IngredientAndRecipeDto;
+import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
 
 @RestController
@@ -28,7 +28,7 @@ public class GptApiController {
     private RestTemplate template;
 
     @GetMapping("/parseRecipe")
-    public IngredientAndRecipeDto parseRecipe(@RequestParam("recipe") String rawRecipe) {
+    public RecipeParseResultDto parseRecipe(@RequestParam("recipe") String rawRecipe) {
         return gptService.parseRecipe(rawRecipe);
     }
 }

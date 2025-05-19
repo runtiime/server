@@ -30,14 +30,9 @@ public class RecipeService {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않습니다."));
 
-    Recipe recipe = Recipe.builder()
-        .title(dto.getTitle())
-        .author(member.getNickname()) // 추후 Member 참조로 바꾸는 것도 추천
-        .likeCount(0)
-        .ranking(0.0)
-        .recipeType(dto.getRecipeType())
-        .isUpdated(false)
-        .build();
+    Recipe recipe = Recipe.of(dto.getTitle(),
+            member.getNickname(),
+            dto.getRecipeType());
     recipeRepository.save(recipe);
 
     MemberRecipe memberRecipe = MemberRecipe.builder()

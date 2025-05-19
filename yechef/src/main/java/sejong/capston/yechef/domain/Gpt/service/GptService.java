@@ -25,73 +25,72 @@ public class GptService {
     @Value("${OPENAI_API_URL}")    private String    apiUrl;
     private final ObjectMapper      objectMapper = new ObjectMapper();
 
-    public IngredientAndRecipeDto parseRecipe(String rawRecipe) {
-        // system 프롬프트: 출력 포맷을 JSON 스키마로 고정
+    public RecipeParseResultDto parseRecipe(String rawRecipe) {
         String systemPrompt = """
-                You are a recipe‐parser bot.
-                 ◆ INPUT : A free-form Korean recipe text that contains both ingredients and cooking instructions.
-                 ◆ OUTPUT : (MUST be valid **pure JSON**, no markdown code-block, no extra keys) 
-                 {
-                   "ingredients": [
-                     { "name": "<재료명>", "quantity": "<수량 또는 계량 단위>" },
-                     …
-                   ],
-                   "steps": [
-                     { "order": 1, "action": "<단일 행위>", "description": "<상세 설명(어떤 재료를 어떻게 하는지)>" },
-                     …
-                   ]
-                 }
-                 
-                 ▣ Rules for steps 
-                 1. Split the recipe into the smallest practical cooking actions.
-                    - 한 줄에 여러 행동(자르고 볶는다)이 나오면 반드시 분리한다. 
-                 2. action 값은 _짧은 한국어 동사/동사구_만 기재한다. (예: "떡 준비", "오뎅 자르기", "소세지 칼집", "계란 삶기", "우유 붓기", "6분 끓이기", "치즈 넣기")
-                    - 명사·부가어구(“재료 손질”, “양념 준비”) 같은 포괄적 표현은 사용하지 않는다. 
-                 3. description 에는 대상 재료·온도·시간 등 세부 정보를 풀어서 적는다. 
-                 4. 번호(order)는 1부터 순차적으로 증가한다. 
-                 5. 출력은 오직 JSON 하나! (앞뒤 설명, json 블록, 태그 모두 금지)
-                
+        너는 레시피 파서를 수행하는 AI야.
+        
+        ◆ 입력: 재료와 요리 과정을 포함한 자유 형식의 한국어 요리 레시피 텍스트
+        ◆ 출력: 아래 JSON 형식에 맞춘 **순수 JSON 데이터만** 출력 (마크다운, 설명 문구, 주석 모두 금지)
+        
+        {
+          "title": "<요리명>",                     ← 제목이 명시되어 있지 않으면, 재료와 과정을 참고해 추정해서 작성하세요.
+          "ingredients": [
+            { "name": "<재료명>", "quantity": "<수량 또는 계량 단위>" },
+            …
+          ],
+          "steps": [
+            { "stepNumber": 1, "action": "<단일 행위>", "description": "<상세 설명>" },
+            …
+          ]
+        }
+        
+        ▣ 출력 규칙
+        1. steps는 문장을 가장 작은 단위의 실제 행동 단위로 쪼개서 작성합니다. (예: "자르고 볶는다" → "자르기", "볶기"로 나누기)
+        2. action 값은 짧은 한국어 동사 또는 동사구여야 합니다. (예: "떡 준비", "칼집 넣기")
+        3. description에는 어떤 재료를 어떻게 다루는지, 시간, 온도 등 구체 정보를 포함합니다.
+        4. stepNumber는 1부터 시작하여 순차적으로 증가합니다.
+        5. 출력은 반드시 JSON만 포함되도록 하세요. 설명이나 마크다운 블록 없이 반환합니다.
         """;
 
-        // messages 준비
-        List<Message> messages = List.of(
-                new Message("system", systemPrompt),
-                new Message("user", rawRecipe)
+        // GPT 호출
+        List<sejong.capston.yechef.domain.Gpt.dto.Message> messages = List.of(
+                new sejong.capston.yechef.domain.Gpt.dto.Message("system", systemPrompt),
+                new sejong.capston.yechef.domain.Gpt.dto.Message("user", rawRecipe)
         );
         ChatGPTRequest req = new ChatGPTRequest(model, messages);
         ChatGPTResponse resp = restTemplate.postForObject(apiUrl, req, ChatGPTResponse.class);
         String content = resp.getChoices().get(0).getMessage().getContent().trim();
 
-        // JsonNode로 파싱해서 DTO로 직접 매핑
         try {
             JsonNode root = objectMapper.readTree(content);
 
-            // ingredients 배열 추출
+            // 제목
+            String title = root.path("title").asText("");
+
+            // 재료
             List<IngredientDto> ingredients = new ArrayList<>();
             for (JsonNode ingNode : root.path("ingredients")) {
-                String name     = ingNode.path("name").asText("");
-                String quantity = ingNode.path("quantity").asText("");
-                ingredients.add(new IngredientDto(name, quantity));
+                ingredients.add(new IngredientDto(
+                        ingNode.path("name").asText(""),
+                        ingNode.path("quantity").asText("")
+                ));
             }
 
-            // steps 배열 추출
+            // 단계
             List<RecipeStepDto> steps = new ArrayList<>();
             for (JsonNode stepNode : root.path("steps")) {
-                int    order       = stepNode.path("order").asInt(0);
-                String action      = stepNode.path("action").asText("");
-                String description = stepNode.path("description").asText("");
                 steps.add(RecipeStepDto.builder()
-                        .stepNumber(order)
-                        .action(action)
-                        .description(description)
+                        .stepNumber(stepNode.path("order").asInt(0))
+                        .action(stepNode.path("action").asText(""))
+                        .description(stepNode.path("description").asText(""))
                         .build()
                 );
             }
 
-            return new IngredientAndRecipeDto(ingredients, steps);
+            return new RecipeParseResultDto(title, ingredients, steps);
 
         } catch (JsonProcessingException e) {
-            log.error("GPT 응답 내용을 파싱하는 데 실패했습니다.: {}", content, e);
+            log.error("GPT 응답 파싱 실패 → content: {}", content, e);
             throw BaseException.from(ErrorCode.GPT_RESPONSE_PARSING_FAILED);
         }
     }
