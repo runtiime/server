@@ -9,11 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import sejong.capston.yechef.domain.Member.Member;
 import sejong.capston.yechef.domain.Member.repository.MemberRepository;
 import sejong.capston.yechef.domain.MemberRecipe.MemberRecipe;
-import sejong.capston.yechef.domain.MemberRecipe.MemberRecipeRepository;
+import sejong.capston.yechef.domain.MemberRecipe.repository.MemberRecipeRepository;
 import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeCreateDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
+import sejong.capston.yechef.global.exception.BaseException;
+import sejong.capston.yechef.global.exception.error.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -53,21 +55,21 @@ public class RecipeService {
   @Transactional(readOnly = true)
   public RecipeDto getRecipe(Long recipeId) {
     Recipe recipe = recipeRepository.findById(recipeId)
-        .orElseThrow(() -> new EntityNotFoundException("레시피가 존재하지 않습니다."));
+        .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
     return RecipeDto.from(recipe);
   }
 
   @Transactional
   public void delete(Long memberId, Long recipeId) {
     MemberRecipe memberRecipe = memberRecipeRepository.findByMemberIdAndRecipeId(memberId, recipeId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 사용자의 레시피가 아닙니다."));
+        .orElseThrow(() -> BaseException.from(ErrorCode.NOT_RECIPE_OWNER));
     recipeRepository.delete(memberRecipe.getRecipe());
   }
 
   @Transactional
   public void toggleLike(Long memberId, Long recipeId) {
     MemberRecipe memberRecipe = memberRecipeRepository.findByMemberIdAndRecipeId(memberId, recipeId)
-        .orElseThrow(() -> new EntityNotFoundException("레시피 좋아요 정보가 없습니다."));
+        .orElseThrow(() -> BaseException.from(ErrorCode.NO_RECIPE_INFO_OF_LIKE));
     memberRecipe.toggleLike();
   }
 }

@@ -1,16 +1,17 @@
 package sejong.capston.yechef.domain.Recipe.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
-import sejong.capston.yechef.domain.Ingredients.Ingredient;
+import sejong.capston.yechef.domain.Ingredient.Ingredient;
 import sejong.capston.yechef.domain.Recipe.Recipe;
-import sejong.capston.yechef.domain.Recipe.dto.RecipeStepResponseDto;
-import sejong.capston.yechef.domain.Recipe.repository.IngredientRepository;
+import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
+import sejong.capston.yechef.domain.Ingredient.repository.IngredientRepository;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
-import sejong.capston.yechef.domain.Recipe.repository.RecipeStepRepository;
+import sejong.capston.yechef.domain.RecipeSteps.repository.RecipeStepRepository;
 import sejong.capston.yechef.domain.RecipeSteps.RecipeStep;
+import sejong.capston.yechef.global.exception.BaseException;
+import sejong.capston.yechef.global.exception.error.ErrorCode;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,13 +25,13 @@ public class RecipeProgressService {
   private final IngredientRepository ingredientRepository;
   private final GptService gptService;
 
-  public RecipeStepResponseDto processStep(Long recipeId, int stepNumber, String userInput) {
+  public RecipeStepDto processStep(Long recipeId, int stepNumber, String userInput) {
     // 레시피 & 단계 조회
     Recipe recipe = recipeRepository.findById(recipeId)
-        .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
 
     RecipeStep currentStep = recipeStepRepository.findByRecipeAndStepNumber(recipe, stepNumber)
-        .orElseThrow(() -> new IllegalArgumentException("해당 단계 없음"));
+        .orElseThrow(() -> BaseException.from(ErrorCode.NOT_EXIST_THIS_STEP));
 
     // 재료 조회
     List<Ingredient> ingredients = ingredientRepository.findByRecipe(recipe);
@@ -39,10 +40,10 @@ public class RecipeProgressService {
     String gptPrompt = buildPrompt(currentStep.getDescription(), userInput, ingredients);
     String gptResult = gptService.simplePrompt(gptPrompt);
 
-    return RecipeStepResponseDto.builder()
-        .gptResult(gptResult)
+    return RecipeStepDto.builder()
+        .action(gptResult)
         .stepNumber(stepNumber)
-        .currentStepDescription(currentStep.getDescription())
+        .description(currentStep.getDescription())
         .build();
   }
 
