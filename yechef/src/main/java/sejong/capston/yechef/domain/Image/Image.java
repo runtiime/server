@@ -1,7 +1,8 @@
-package sejong.capston.yechef.domain.Recipe;
+package sejong.capston.yechef.domain.Image;
 
 import jakarta.persistence.*;
 import lombok.*;
+import sejong.capston.yechef.domain.Recipe.Recipe;
 
 @Entity
 @Getter
