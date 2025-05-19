@@ -33,4 +33,12 @@ public class KakaoImageService {
       throw BaseException.from(ErrorCode.KAKAO_API_ERROR, "카카오 이미지 API 호출 실패: " + e.getMessage());
     }
   }
+
+  public String getTopImageUrl(String keyword) {
+    KakaoImageResponseDto response = searchImage(keyword);
+    if (response.getDocuments().isEmpty()) {
+      throw BaseException.from(ErrorCode.KAKAO_API_ERROR, "이미지 검색 결과가 없습니다.");
+    }
+    return response.getDocuments().get(0).getImageUrl();
+  }
 }
