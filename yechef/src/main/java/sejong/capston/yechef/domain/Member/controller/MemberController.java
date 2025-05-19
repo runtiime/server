@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sejong.capston.yechef.domain.Member.MemberService;
+import sejong.capston.yechef.domain.Member.service.MemberService;
 import sejong.capston.yechef.domain.Member.dto.MemberCreateDto;
 import sejong.capston.yechef.domain.Member.dto.MemberDto;
 import sejong.capston.yechef.domain.Member.dto.MemberUpdateDto;

@@ -1,9 +1,10 @@
-package sejong.capston.yechef.domain.Member;
+package sejong.capston.yechef.domain.Member.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sejong.capston.yechef.domain.Member.Member;
 import sejong.capston.yechef.domain.Member.dto.MemberCreateDto;
 import sejong.capston.yechef.domain.Member.dto.MemberDto;
 import sejong.capston.yechef.domain.Member.dto.MemberUpdateDto;
@@ -22,7 +23,7 @@ public class MemberService {
   public MemberDto createMember(MemberCreateDto createDto) {
     Member member = Member.builder()
         .nickname(createDto.getNickname())
-        .email(createDto.getEmail())
+        //.email(createDto.getEmail())
         .build();
     memberRepository.save(member);
     log.info("회원 생성 성공: id: {}", member.getId());
@@ -45,7 +46,7 @@ public class MemberService {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
 
-    member.update(updateDto.getNickname(), updateDto.getEmail());
+    member.update(updateDto.getNickname());
     log.info("회원 정보 수정 성공: id: {}", memberId);
     return toDto(member);
   }
@@ -62,7 +63,6 @@ public class MemberService {
     return MemberDto.builder()
         .id(member.getId())
         .nickname(member.getNickname())
-        .email(member.getEmail())
         .build();
   }
 }
