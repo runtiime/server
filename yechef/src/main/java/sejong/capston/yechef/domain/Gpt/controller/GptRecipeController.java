@@ -16,7 +16,7 @@ import sejong.capston.yechef.domain.Recipe.dto.SaveRecipeRequest;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/gpt/recipes")
-@Tag(name = "", description = "동행 api 정보")
+@Tag(name = "GPT 레시피 생성", description = "GPT를 이용해 레시피 텍스트를 파싱하고 저장하는 API")
 public class GptRecipeController {
 
     private final GptRecipeService gptRecipeService;
