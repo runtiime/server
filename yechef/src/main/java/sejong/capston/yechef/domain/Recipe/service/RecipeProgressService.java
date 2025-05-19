@@ -1,6 +1,7 @@
 package sejong.capston.yechef.domain.Recipe.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
 import sejong.capston.yechef.domain.Ingredient.Ingredient;
@@ -14,8 +15,10 @@ import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecipeProgressService {
@@ -26,24 +29,94 @@ public class RecipeProgressService {
   private final GptService gptService;
 
   public RecipeStepDto processStep(Long recipeId, int stepNumber, String userInput) {
-    // 레시피 & 단계 조회
     Recipe recipe = recipeRepository.findById(recipeId)
         .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
 
     RecipeStep currentStep = recipeStepRepository.findByRecipeAndStepNumber(recipe, stepNumber)
         .orElseThrow(() -> BaseException.from(ErrorCode.NOT_EXIST_THIS_STEP));
 
-    // 재료 조회
     List<Ingredient> ingredients = ingredientRepository.findByRecipe(recipe);
 
-    // GPT 프롬프트 구성 및 호출
+    log.info("🎙️ 사용자 입력: {}", userInput);
+    log.info("📍 현재 단계 번호: {}, 내용: {}", stepNumber, currentStep.getDescription());
+
     String gptPrompt = buildPrompt(currentStep.getDescription(), userInput, ingredients);
     String gptResult = gptService.simplePrompt(gptPrompt);
 
+    log.info("🧠 GPT 응답: {}", gptResult);
+
+    if (gptResult.equalsIgnoreCase("NEXT")) {
+      Optional<RecipeStep> nextStepOpt = recipeStepRepository.findByRecipeAndStepNumber(recipe, stepNumber + 1);
+      if (nextStepOpt.isPresent()) {
+        RecipeStep nextStep = nextStepOpt.get();
+        return RecipeStepDto.builder()
+            .stepNumber(stepNumber + 1)
+            .description(nextStep.getDescription())
+            .action("다음으로 갈게요.")
+            .build();
+      } else {
+        return RecipeStepDto.builder()
+            .stepNumber(stepNumber)
+            .description(currentStep.getDescription())
+            .action("마지막 단계예요.")
+            .build();
+      }
+
+    } else if (gptResult.equalsIgnoreCase("PREVIOUS")) {
+      if (stepNumber <= 1) {
+        return RecipeStepDto.builder()
+            .stepNumber(stepNumber)
+            .description(currentStep.getDescription())
+            .action("처음 단계예요.")
+            .build();
+      } else {
+        RecipeStep prevStep = recipeStepRepository.findByRecipeAndStepNumber(recipe, stepNumber - 1)
+            .orElseThrow(() -> BaseException.from(ErrorCode.NOT_EXIST_THIS_STEP));
+        return RecipeStepDto.builder()
+            .stepNumber(stepNumber - 1)
+            .description(prevStep.getDescription())
+            .action("이전 단계로 갈게요.")
+            .build();
+      }
+
+    } else if (gptResult.equalsIgnoreCase("REPEAT")) {
+      return RecipeStepDto.builder()
+          .stepNumber(stepNumber)
+          .description(currentStep.getDescription())
+          .action("다시 말씀드릴게요.")
+          .build();
+
+    } else if (gptResult.startsWith("EXPLAIN:")) {
+      String explanation = gptResult.replace("EXPLAIN:", "").trim();
+      return RecipeStepDto.builder()
+          .stepNumber(stepNumber)
+          .description(currentStep.getDescription())
+          .action("설명드릴게요. " + explanation)
+          .build();
+
+    } else if (gptResult.startsWith("SUBSTITUTE:")) {
+      String[] parts = gptResult.replace("SUBSTITUTE:", "").trim().split("→");
+      if (parts.length == 2) {
+        String original = parts[0].trim();
+        String substitute = parts[1].trim();
+
+        ingredientRepository.findByRecipe(recipe).stream()
+            .filter(i -> i.getOriginalName().equals(original))
+            .findFirst()
+            .ifPresent(i -> i.setOriginalName(substitute)); // 실제 반영
+
+        return RecipeStepDto.builder()
+            .stepNumber(stepNumber)
+            .description(currentStep.getDescription())
+            .action("‘%s’를 ‘%s’로 바꿀게요.".formatted(original, substitute))
+            .build();
+      }
+    }
+
     return RecipeStepDto.builder()
-        .action(gptResult)
         .stepNumber(stepNumber)
         .description(currentStep.getDescription())
+        .action("다시 말씀해 주세요.")
         .build();
   }
 
@@ -53,16 +126,18 @@ public class RecipeProgressService {
         .collect(Collectors.joining("\n"));
 
     return """
-      현재 요리 단계: "%s"
-      사용자의 음성 입력: "%s"
+    지금 요리 중인 단계는 "%s"입니다.
+    사용자 입력: "%s"
 
-      레시피 재료 목록:
-      %s
+    참고할 재료 목록:
+    %s
 
-      아래 중 하나만 출력하세요:
-      - "NEXT": 다음 단계로 넘어갈 수 있음
-      - "REPEAT": 다시 설명 필요
-      - "EXPLAIN: <설명>": 보조 설명 필요
-      """.formatted(stepDescription, userInput, formattedIngredients);
+    아래 중 하나로 답해주세요:
+    - "NEXT": 다음 단계로 이동
+    - "PREVIOUS": 이전 단계로 이동
+    - "REPEAT": 다시 설명
+    - "EXPLAIN: <설명>": 보조 설명
+    - "SUBSTITUTE: <기존재료> → <대체재료>": 재료 변경
+    """.formatted(stepDescription, userInput, formattedIngredients);
   }
 }
