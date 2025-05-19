@@ -23,7 +23,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(withDefaults())
             .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (쿠키 기반 인증에서는 CSRF 보호 필요할 수도 있음)
-            .cors(withDefaults())
             .formLogin((auth) -> auth.disable())
             .httpBasic((auth) -> auth.disable())
             .exceptionHandling(e ->
