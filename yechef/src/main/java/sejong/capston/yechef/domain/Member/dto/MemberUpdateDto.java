@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class MemberUpdateDto {
   private String nickname;
-  private String email;
+  //private String email;
 }
