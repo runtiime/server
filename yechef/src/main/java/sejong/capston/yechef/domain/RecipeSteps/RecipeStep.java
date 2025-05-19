@@ -33,4 +33,12 @@ public class RecipeStep {
         this.description = description;
         this.recipe = recipe;
     }
+
+    public static RecipeStep of(int stepNumber, String description, Recipe recipe) {
+        return RecipeStep.builder()
+                .stepNumber(stepNumber)
+                .description(description)
+                .recipe(recipe)
+                .build();
+    }
 }

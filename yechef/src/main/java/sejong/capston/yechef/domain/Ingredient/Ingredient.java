@@ -45,4 +45,20 @@ public class Ingredient extends BaseEntity {
         this.oneServingAmount = oneServingAmount;
         this.recipe = recipe;
     }
+
+    public static Ingredient of(
+            String originalName,
+            String alternativeName,
+            String originalAmount,
+            String oneServingAmount,
+            Recipe recipe
+    ) {
+        return Ingredient.builder()
+                .originalName(originalName)
+                .alternativeName(alternativeName)
+                .originalAmount(originalAmount)
+                .oneServingAmount(oneServingAmount)
+                .recipe(recipe)
+                .build();
+    }
 }
