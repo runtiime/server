@@ -12,7 +12,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class IngredientAndRecipeDto {
+public class RecipeParseResultDto {
+    private String title;
     private List<IngredientDto> ingredients;
     private List<RecipeStepDto> steps;
 }
