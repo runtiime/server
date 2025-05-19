@@ -53,7 +53,7 @@ public class Recipe extends BaseEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MemberRecipe> memberRecipes = new ArrayList<>();
 
-    @OneToOne(mappedBy = "recipe", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "recipe", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Image image;
 
     @Builder
