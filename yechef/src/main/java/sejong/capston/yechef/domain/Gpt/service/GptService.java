@@ -1,19 +1,19 @@
 package sejong.capston.yechef.domain.Gpt.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import sejong.capston.yechef.domain.Gpt.dto.ChatGPTRequest;
-import sejong.capston.yechef.domain.Gpt.dto.ChatGPTResponse;
-import sejong.capston.yechef.domain.Gpt.dto.Message;
-import sejong.capston.yechef.domain.Gpt.dto.RecipeAnalysisResponseDto;
+import sejong.capston.yechef.domain.Gpt.dto.*;
+import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
 import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,7 +25,7 @@ public class GptService {
     @Value("${OPENAI_API_URL}")    private String    apiUrl;
     private final ObjectMapper      objectMapper = new ObjectMapper();
 
-    public RecipeAnalysisResponseDto analyzeRecipe(String rawRecipe) {
+    public IngredientAndRecipeDto parseRecipe(String rawRecipe) {
         // system 프롬프트: 출력 포맷을 JSON 스키마로 고정
         String systemPrompt = """
                 You are a recipe‐parser bot.
@@ -59,14 +59,37 @@ public class GptService {
                 new Message("user", rawRecipe)
         );
         ChatGPTRequest req = new ChatGPTRequest(model, messages);
-
-        // OpenAI 호출
         ChatGPTResponse resp = restTemplate.postForObject(apiUrl, req, ChatGPTResponse.class);
-        String content = resp.getChoices().get(0).getMessage().getContent();
+        String content = resp.getChoices().get(0).getMessage().getContent().trim();
 
-        // JSON → DTO
+        // JsonNode로 파싱해서 DTO로 직접 매핑
         try {
-            return objectMapper.readValue(content, RecipeAnalysisResponseDto.class);
+            JsonNode root = objectMapper.readTree(content);
+
+            // ingredients 배열 추출
+            List<IngredientDto> ingredients = new ArrayList<>();
+            for (JsonNode ingNode : root.path("ingredients")) {
+                String name     = ingNode.path("name").asText("");
+                String quantity = ingNode.path("quantity").asText("");
+                ingredients.add(new IngredientDto(name, quantity));
+            }
+
+            // steps 배열 추출
+            List<RecipeStepDto> steps = new ArrayList<>();
+            for (JsonNode stepNode : root.path("steps")) {
+                int    order       = stepNode.path("order").asInt(0);
+                String action      = stepNode.path("action").asText("");
+                String description = stepNode.path("description").asText("");
+                steps.add(RecipeStepDto.builder()
+                        .stepNumber(order)
+                        .action(action)
+                        .description(description)
+                        .build()
+                );
+            }
+
+            return new IngredientAndRecipeDto(ingredients, steps);
+
         } catch (JsonProcessingException e) {
             log.error("GPT 응답 내용을 파싱하는 데 실패했습니다.: {}", content, e);
             throw BaseException.from(ErrorCode.GPT_RESPONSE_PARSING_FAILED);

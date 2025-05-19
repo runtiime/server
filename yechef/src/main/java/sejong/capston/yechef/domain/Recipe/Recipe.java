@@ -74,4 +74,16 @@ public class Recipe extends BaseEntity {
         this.recipeType = recipeType;
         this.isUpdated = isUpdated;
     }
+
+    // 새 레시피 생성
+    public static Recipe of(String title, String author, RecipeType recipeType) {
+        return Recipe.builder()
+                .title(title)
+                .author(author)
+                .likeCount(0)
+                .ranking(0.0)
+                .recipeType(recipeType)
+                .isUpdated(false)
+                .build();
+    }
 }
