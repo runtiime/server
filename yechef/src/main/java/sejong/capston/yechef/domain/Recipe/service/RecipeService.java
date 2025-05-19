@@ -35,7 +35,12 @@ public class RecipeService {
             dto.getRecipeType());
     recipeRepository.save(recipe);
 
-    MemberRecipe memberRecipe = new MemberRecipe(member, recipe);
+    MemberRecipe memberRecipe = MemberRecipe.builder()
+        .member(member)
+        .recipe(recipe)
+        .isOwner(true)
+        .isLiked(false)
+        .build();
     memberRecipeRepository.save(memberRecipe);
 
     return RecipeDto.from(recipe);
@@ -63,8 +68,38 @@ public class RecipeService {
 
   @Transactional
   public void toggleLike(Long memberId, Long recipeId) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
+    Recipe recipe = recipeRepository.findById(recipeId)
+        .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
+
     MemberRecipe memberRecipe = memberRecipeRepository.findByMemberIdAndRecipeId(memberId, recipeId)
-        .orElseThrow(() -> BaseException.from(ErrorCode.NO_RECIPE_INFO_OF_LIKE));
-    memberRecipe.toggleLike();
+        .orElse(null);
+
+    if (memberRecipe == null) {
+      // 처음 좋아요 누름 → 새로 생성
+      memberRecipe = MemberRecipe.builder()
+          .member(member)
+          .recipe(recipe)
+          .isOwner(false)
+          .isLiked(true)
+          .build();
+      memberRecipeRepository.save(memberRecipe);
+      recipe.setLikeCount(recipe.getLikeCount() + 1);
+    } else {
+      // 기존 존재 → 좋아요 토글
+      boolean wasLiked = memberRecipe.getIsLiked();
+      memberRecipe.toggleLike();
+      recipe.setLikeCount(recipe.getLikeCount() + (memberRecipe.getIsLiked() ? 1 : -1));
+    }
   }
+  @Transactional(readOnly = true)
+  public List<RecipeDto> getLikedRecipes(Long memberId) {
+    List<Recipe> likedRecipes = memberRecipeRepository.findLikedRecipesByMemberId(memberId);
+    return likedRecipes.stream()
+        .map(RecipeDto::from)
+        .collect(Collectors.toList());
+  }
+
+
 }

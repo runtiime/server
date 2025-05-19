@@ -31,16 +31,16 @@ public class Member extends BaseEntity {
   }
 
   @Builder
-  public Member(String nickname, String email, Long oauthId, Role role) {
+  public Member(String nickname, Long oauthId, Role role) {
     this.nickname = nickname;
-    this.email = email;
+    //this.email = email;
     this.oauthId = oauthId;
     this.role = role;
   }
 
-  public void update(String nickname, String email) {
+  public void update(String nickname) {
     this.nickname = nickname;
-    this.email = email;
+    //this.email = email;
   }
 
 }

@@ -30,7 +30,6 @@ public class GptRecipeService {
     private final RecipeRepository recipeRepository;
     private final MemberRepository memberRepository;
     private final MemberRecipeRepository memberRecipeRepository;
-
     @Transactional
     public RecipeResponseDto createFromRaw(
             Long memberId,
@@ -39,7 +38,7 @@ public class GptRecipeService {
     ) {
         // 회원 확인
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
 
         // GPT로 파싱 (제목, 재료, 단계)
         RecipeParseResultDto parsed = gptService.parseRecipe(rawRecipe);
@@ -48,8 +47,15 @@ public class GptRecipeService {
         Recipe recipe = Recipe.of(parsed.getTitle(), member.getNickname(), request.getRecipeType());
         recipeRepository.save(recipe);
 
-        // MemberRecipe 저장
-        memberRecipeRepository.save(new MemberRecipe(member, recipe));
+
+        // MemberRecipe 연결 저장 (수정된 부분)
+        MemberRecipe memberRecipe = MemberRecipe.builder()
+            .member(member)
+            .recipe(recipe)
+            .isOwner(true)   // GPT로 생성된 레시피는 사용자 본인이 만든 것이므로 true
+            .isLiked(false)  // 초기 상태는 좋아요 X
+            .build();
+        memberRecipeRepository.save(memberRecipe);
 
         // Ingredient / RecipeStep 저장
         ingredientService.saveIngredients(parsed.getIngredients(), recipe);
@@ -57,4 +63,5 @@ public class GptRecipeService {
 
         return RecipeResponseDto.from(recipe);
     }
+
 }
