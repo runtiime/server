@@ -16,6 +16,6 @@ public class Image {
 
   private String s3Url;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY)
   private Recipe recipe;
 }
