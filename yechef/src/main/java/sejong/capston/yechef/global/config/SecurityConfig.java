@@ -37,7 +37,8 @@ public class SecurityConfig {
                         "/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**",
                         "/bot", "/bot/**",  // gpt api
                         "/swagger-ui/**",
-                        "/v3/api-docs/**"
+                        "/v3/api-docs/**",
+                        "/api/images"
                 ).permitAll()
 
 
