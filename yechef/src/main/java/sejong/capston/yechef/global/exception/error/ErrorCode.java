@@ -35,8 +35,10 @@ public enum ErrorCode {
     GPT_RESPONSE_PARSING_FAILED("GPT-0000", "GPT 응답 파싱에 실패했습니다.", ErrorDisplayType.POPUP),
 
     //s3
-    FILE_UPLOAD_FAIL("S3_001", "파일 업로드에 실패했습니다.", ErrorDisplayType.TOAST)
+    FILE_UPLOAD_FAIL("S3_001", "파일 업로드에 실패했습니다.", ErrorDisplayType.TOAST),
 
+    // kakao img api
+    KAKAO_API_ERROR("K001", "카카오 이미지 검색 중 오류 발생", ErrorDisplayType.TOAST)
     ;
 
     private final String code;
