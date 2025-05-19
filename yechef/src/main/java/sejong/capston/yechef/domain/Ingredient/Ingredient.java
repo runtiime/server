@@ -1,4 +1,4 @@
-package sejong.capston.yechef.domain.Ingredients;
+package sejong.capston.yechef.domain.Ingredient;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

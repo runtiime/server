@@ -1,4 +1,4 @@
-package sejong.capston.yechef.domain.Recipe.repository;
+package sejong.capston.yechef.domain.RecipeSteps.repository;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
