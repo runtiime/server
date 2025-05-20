@@ -7,18 +7,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Image.Image;
 import sejong.capston.yechef.domain.Image.repository.ImageRepository;
 import sejong.capston.yechef.domain.Image.service.ImageService;
-import sejong.capston.yechef.domain.KakaoImage.service.KakaoImageService;
+import sejong.capston.yechef.domain.Ingredient.service.IngredientService;
 import sejong.capston.yechef.domain.Member.Member;
 import sejong.capston.yechef.domain.Member.repository.MemberRepository;
 import sejong.capston.yechef.domain.MemberRecipe.MemberRecipe;
 import sejong.capston.yechef.domain.MemberRecipe.repository.MemberRecipeRepository;
 import sejong.capston.yechef.domain.Recipe.Recipe;
-import sejong.capston.yechef.domain.Recipe.dto.RecipeCreateDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
+import sejong.capston.yechef.domain.Recipe.dto.SaveRecipeRequest;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
+import sejong.capston.yechef.domain.RecipeSteps.repository.RecipeStepRepository;
+import sejong.capston.yechef.domain.RecipeSteps.service.RecipeStepService;
 import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
 import sejong.capston.yechef.global.s3.service.S3UploadService;
@@ -30,33 +33,52 @@ public class RecipeService {
   private final RecipeRepository recipeRepository;
   private final MemberRepository memberRepository;
   private final MemberRecipeRepository memberRecipeRepository;
-  private final ImageService imageService;
   private final ImageRepository imageRepository;
+
+  private final ImageService imageService;
   private final S3UploadService s3UploadService;
+  private final IngredientService ingredientService;
+  private final RecipeStepService recipeStepService;
 
   @Transactional
-  public RecipeDto create(Long memberId, RecipeCreateDto dto, MultipartFile sourceImageFile) {
+  public RecipeDto create(Long memberId, RecipeParseResultDto recipeDto, MultipartFile sourceImageFile) {
+
+    // 회원 확인
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않습니다."));
+            .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
 
-    // 1. 업로드 및 URL 획득 (키 생성 포함)
+    // 업로드 및 URL 획득 (키 생성 포함)
     String s3Url = s3UploadService.uploadAndGenerateKey(sourceImageFile);
-    String s3Key = s3UploadService.extractKeyFromUrl(s3Url); // url → key 저장용 (아래 참고)
+    String s3Key = s3UploadService.extractKeyFromUrl(s3Url);
 
-    // 2. 이미지 저장
+    // 이미지 저장
     Image sourceImage = imageRepository.save(Image.builder()
-        .s3Url(s3Url)
-        .s3Key(s3Key)
-        .build());
+         .s3Url(s3Url)
+         .s3Key(s3Key)
+         .build());
 
-    // 3. 레시피 저장
-    Recipe recipe = Recipe.of(dto.getTitle(), member.getNickname(), dto.getRecipeType(), sourceImage);
+    // Recipe 저장
+    Recipe recipe = Recipe.of(
+            recipeDto.getTitle(),
+            member.getNickname(),
+            Recipe.RecipeType.PRIVATE,
+            recipeDto.getServings(),
+            sourceImage);
     recipeRepository.save(recipe);
 
-    imageService.generateAndSaveThumbnail(recipe.getId());
+    // MemberRecipe 연결
+    MemberRecipe memberRecipe = MemberRecipe.of(member, recipe);
+    memberRecipeRepository.save(memberRecipe);
 
-    // 4. 사용자와 연결
-    memberRecipeRepository.save(MemberRecipe.of(member, recipe));
+    // Member 연결
+    memberRecipeRepository.save(memberRecipe);
+
+    // Ingredient / RecipeStep 저장
+    ingredientService.saveIngredients(recipeDto.getIngredients(), recipe);
+    recipeStepService.saveSteps(recipeDto.getSteps(), recipe);
+
+    // 썸네일 자동 생성
+    imageService.generateAndSaveThumbnail(recipe.getId());
 
     return RecipeDto.from(recipe);
   }
@@ -96,21 +118,21 @@ public class RecipeService {
   @Transactional
   public void toggleLike(Long memberId, Long recipeId) {
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
     Recipe recipe = recipeRepository.findById(recipeId)
-        .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
+            .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
 
     MemberRecipe memberRecipe = memberRecipeRepository.findByMemberIdAndRecipeId(memberId, recipeId)
-        .orElse(null);
+            .orElse(null);
 
     if (memberRecipe == null) {
       // 처음 좋아요 누름 → 새로 생성
       memberRecipe = MemberRecipe.builder()
-          .member(member)
-          .recipe(recipe)
-          .isOwner(false)
-          .isLiked(true)
-          .build();
+              .member(member)
+              .recipe(recipe)
+              .isOwner(false)
+              .isLiked(true)
+              .build();
       memberRecipeRepository.save(memberRecipe);
       recipe.setLikeCount(recipe.getLikeCount() + 1);
     } else {

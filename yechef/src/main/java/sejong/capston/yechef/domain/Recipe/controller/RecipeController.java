@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeCreateDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
@@ -23,7 +24,7 @@ public class RecipeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public RecipeDto createRecipe(
       @AuthenticationPrincipal LoginMemberDto user,
-      @RequestPart("data") RecipeCreateDto dto,
+      @RequestPart("data") RecipeParseResultDto dto,
       @RequestPart("sourceImage") MultipartFile sourceImageFile
   ) {
     return recipeService.create(user.getId(), dto, sourceImageFile);
