@@ -54,8 +54,11 @@ public class Recipe extends BaseEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MemberRecipe> memberRecipes = new ArrayList<>();
 
-    @OneToOne(mappedBy = "recipe", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Image image;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Image thumbnailImage;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Image sourceImage;
 
     @Builder
     public Recipe(
@@ -66,7 +69,8 @@ public class Recipe extends BaseEntity {
             double ranking,
             int servings,
             RecipeType recipeType,
-            boolean isUpdated
+            boolean isUpdated,
+            Image sourceImage
     ) {
         this.id = id;
         this.title = title;
@@ -76,10 +80,11 @@ public class Recipe extends BaseEntity {
         this.servings = servings;
         this.recipeType = recipeType;
         this.isUpdated = isUpdated;
+        this.sourceImage = sourceImage;
     }
 
     // 새 레시피 생성
-    public static Recipe of(String title, String author, RecipeType recipeType, int servings) {
+    public static Recipe of(String title, String author, RecipeType recipeType, int servings, Image sourceImage) {
         return Recipe.builder()
                 .title(title)
                 .author(author)
@@ -88,6 +93,7 @@ public class Recipe extends BaseEntity {
                 .servings(servings)
                 .recipeType(recipeType)
                 .isUpdated(false)
+                .sourceImage(sourceImage)
                 .build();
     }
 }

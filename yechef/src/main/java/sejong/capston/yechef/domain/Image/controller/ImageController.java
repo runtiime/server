@@ -18,7 +18,7 @@ public class ImageController {
 
   @PostMapping("/generate")
   public ResponseEntity<Void> generate(@RequestParam Long recipeId) {
-    imageService.generateAndSaveImageForRecipe(recipeId);
+    imageService.generateAndSaveThumbnail(recipeId); // ← 정확한 메서드명으로 수정
     return ResponseEntity.ok().build();
   }
 }

@@ -14,6 +14,7 @@ import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -67,4 +68,54 @@ public class S3UploadService {
         .build());
     return url;
   }
+
+  public void deleteFile(String s3Key) {
+    try {
+      DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+          .bucket(bucketName)
+          .key(s3Key)
+          .build();
+      s3Client.deleteObject(deleteObjectRequest);
+
+    } catch (Exception e) {
+      throw BaseException.from(ErrorCode.FILE_DELETE_FAIL, e.getMessage());
+    }
+  }
+
+  public String uploadWithKey(MultipartFile file, String fileKey) {
+    String fileUrl = "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileKey;
+
+    try (InputStream inputStream = file.getInputStream()) {
+      PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+          .bucket(bucketName)
+          .key(fileKey)
+          .contentType(file.getContentType())
+          .acl(ObjectCannedACL.PUBLIC_READ)
+          .build();
+
+      s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, file.getSize()));
+
+      return fileUrl;
+
+    } catch (IOException e) {
+      throw BaseException.from(ErrorCode.FILE_UPLOAD_FAIL, "파일 업로드 중 IO 오류: " + e.getMessage());
+    } catch (Exception e) {
+      throw BaseException.from(ErrorCode.FILE_UPLOAD_FAIL, "파일 업로드 실패: " + e.getMessage());
+    }
+  }
+
+  public String uploadAndGenerateKey(MultipartFile file) {
+    String key = generateS3Key(file);
+    return uploadWithKey(file, key); // 내부 재사용
+  }
+
+  private String generateS3Key(MultipartFile file) {
+    return "source-images/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+  }
+
+  public String extractKeyFromUrl(String url) {
+    if (url == null || !url.contains(".amazonaws.com/")) return null;
+    return url.substring(url.indexOf(".com/") + 5);
+  }
+
 }
