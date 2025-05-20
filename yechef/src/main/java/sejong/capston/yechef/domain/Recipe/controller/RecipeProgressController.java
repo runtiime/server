@@ -25,7 +25,7 @@ public class RecipeProgressController {
       @PathVariable int stepNumber,
       @RequestBody VoiceInputDto input
   ) {
-    return progressService.processStep(recipeId, stepNumber, input.getText());
+    return progressService.processStep(memberId, recipeId, stepNumber, input.getText());
   }
 }
 
