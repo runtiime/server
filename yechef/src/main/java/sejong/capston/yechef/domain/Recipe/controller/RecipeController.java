@@ -23,12 +23,12 @@ public class RecipeController {
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public RecipeDto createRecipe(
-      LoginMemberDto user,
+      Long memberId,
       //@AuthenticationPrincipal LoginMemberDto user,
       @RequestPart("data") RecipeParseResultDto dto,
       @RequestPart("sourceImage") MultipartFile sourceImageFile
   ) {
-    return recipeService.create(user.getId(), dto, sourceImageFile);
+    return recipeService.create(memberId, dto, sourceImageFile);
   }
 
   @GetMapping("/{recipeId}")
@@ -38,11 +38,11 @@ public class RecipeController {
 
   @DeleteMapping("/{recipeId}")
   public ResponseEntity<Void> deleteRecipe(
-      LoginMemberDto user,
+      Long memberId,
       //@AuthenticationPrincipal LoginMemberDto user,
       @PathVariable Long recipeId
   ) {
-    recipeService.delete(user.getId(), recipeId);
+    recipeService.delete(memberId, recipeId);
     return ResponseEntity.noContent().build();
   }
 
