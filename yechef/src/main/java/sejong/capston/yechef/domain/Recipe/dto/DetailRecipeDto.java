@@ -2,8 +2,10 @@ package sejong.capston.yechef.domain.Recipe.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import sejong.capston.yechef.domain.Gpt.dto.IngredientDto;
 import sejong.capston.yechef.domain.Image.Dto.ImageDto;
 import sejong.capston.yechef.domain.Image.Image;
+import sejong.capston.yechef.domain.Ingredient.Ingredient;
 import sejong.capston.yechef.domain.MemberRecipe.MemberRecipe;
 import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.RecipeSteps.RecipeStep;
@@ -23,6 +25,8 @@ public class DetailRecipeDto {
   private String text;
   private Recipe.RecipeType recipeType;
   private boolean isUpdated;
+
+  private List<IngredientDto> ingredients;
   private List<RecipeStepDto> recipeSteps;
 
   private ImageDto thumbnailImage;
@@ -39,6 +43,11 @@ public class DetailRecipeDto {
         .text(recipe.getText())
         .recipeType(recipe.getRecipeType())
         .isUpdated(recipe.isUpdated())
+        .ingredients(recipe.getIngredients() != null
+            ? recipe.getIngredients().stream()
+            .map(IngredientDto::from)
+            .collect(Collectors.toList())
+            : null)
         .recipeSteps(recipe.getRecipeSteps() != null
             ? recipe.getRecipeSteps().stream()
             .map(RecipeStepDto::from)
