@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import sejong.capston.yechef.domain.Image.Image;
+import sejong.capston.yechef.domain.Ingredient.Ingredient;
 import sejong.capston.yechef.domain.MemberRecipe.MemberRecipe;
 import sejong.capston.yechef.domain.RecipeSteps.RecipeStep;
 import sejong.capston.yechef.global.entity.BaseEntity;
@@ -48,6 +49,9 @@ public class Recipe extends BaseEntity {
 
     @OneToMany(mappedBy = "originalRecipeId", fetch = FetchType.LAZY)
     private List<Recipe> derivedRecipes;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ingredient> ingredients = new ArrayList<>();
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeStep> recipeSteps = new ArrayList<>();
