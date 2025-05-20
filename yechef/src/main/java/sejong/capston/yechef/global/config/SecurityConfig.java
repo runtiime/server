@@ -1,7 +1,7 @@
 package sejong.capston.yechef.global.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,65 +9,51 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//import sejong.capston.yechef.global.login.jwt.JwtFilter;
 import sejong.capston.yechef.global.login.jwt.JwtAuthenticationEntryPoint;
-import sejong.capston.yechef.global.login.jwt.JwtFilter;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtFilter jwtFilter;
+    // 테스트용으로 필터 주입 주석 처리
+    // private final JwtFilter jwtFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(withDefaults())
-            .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (쿠키 기반 인증에서는 CSRF 보호 필요할 수도 있음)
-            .formLogin((auth) -> auth.disable())
-            .httpBasic((auth) -> auth.disable())
-            .exceptionHandling(e ->
-                    e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+        http
+                .cors(withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
+                .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-            .authorizeHttpRequests(auth -> auth
-                // ────── 토큰 없이도 허용할 엔드포인트 ──────
-                .requestMatchers(
-                        "/auth/**",
-                        "/login",   // kakao 회원 가입 위한 외부인의 최초 접근 엔드포인트
-                        "/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**",
-                        "/bot", "/bot/**",  // gpt api
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/api/images",
-                        "/api/users","/api/users/**",
-                        "/api/recipes/**"
-                ).permitAll()
+                // ─── 모든 요청을 인증 없이 허용 ───
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
 
+                // JWT 없이도 상태 없는 세션 정책 유지
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
 
-                // 관리자 전용
-                .requestMatchers("/admin").hasRole("ADMIN")
-
-                // 그 외는 인증 필요
-                .anyRequest().authenticated()
-        );
-
-
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // JWT 사용하므로 세션 사용 안 함
-
-
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+        // JWT 필터 주석 처리
+        // http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-
     }
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
+        // 정적 리소스만 무시
         return web -> web.ignoring().requestMatchers(
-                "/favicon.ico",
-                "/static/**",
-                "/css/**",
-                "/js/**",
-                "/images/**"
+                "/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**"
         );
     }
-
 }
