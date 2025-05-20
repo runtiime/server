@@ -34,6 +34,7 @@ public class GptService {
         
         {
           "title": "<요리명>",       ← 제목이 명시되어 있지 않으면, 재료와 과정을 참고하여 가장 기본적인 음식 이름으로 추정해서 작성하세요.
+          "text": "<한 줄 요리 설명>",  ← 한 줄로 요리에 대한 간단한 설명 넣어줘
           "servings": "<인분 수>",   ← 몇 인분인지 반드시 작성(기본 값은 1인분, 레시피 텍스트 내용 기반으로 추측)
           "ingredients": [
             { "name": "<재료명>", "quantity": "<수량 또는 계량 단위>" },
@@ -69,6 +70,9 @@ public class GptService {
             // 제목
             String title = root.path("title").asText("");
 
+            // 음식 한 줄 설명
+            String text = root.path("text").asText("");
+
             // 인분
             int servings = root.path("servings").asInt(1);
 
@@ -92,7 +96,7 @@ public class GptService {
                 );
             }
 
-            return new RecipeParseResultDto(title, servings, ingredients, steps);
+            return new RecipeParseResultDto(title, text, servings, ingredients, steps);
 
         } catch (JsonProcessingException e) {
             log.error("GPT 응답 파싱 실패 → content: {}", content, e);

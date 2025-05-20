@@ -30,6 +30,7 @@ public class Recipe extends BaseEntity {
     @NonNull private String author;
     private double ranking;
     private int servings;
+    @Lob private String text;
 
     @Enumerated(EnumType.STRING)
     private RecipeType recipeType;
@@ -69,6 +70,7 @@ public class Recipe extends BaseEntity {
             double ranking,
             RecipeType recipeType,
             int servings,
+            String text,
             boolean isUpdated,
             Image sourceImage
     ) {
@@ -78,12 +80,15 @@ public class Recipe extends BaseEntity {
         this.author = author;
         this.ranking = ranking;
         this.recipeType = recipeType;
+        this.servings = servings;
+        this.text = text;
         this.isUpdated = isUpdated;
         this.sourceImage = sourceImage;
     }
 
     // 새 레시피 생성
-    public static Recipe of(String title, String author, RecipeType recipeType, int servings, Image sourceImage) {
+    public static Recipe of(String title, String author, RecipeType recipeType,
+                            int servings, String text, Image sourceImage) {
         return Recipe.builder()
                 .title(title)
                 .author(author)
@@ -91,6 +96,7 @@ public class Recipe extends BaseEntity {
                 .ranking(0.0)
                 .recipeType(recipeType)
                 .servings(servings)
+                .text(text)
                 .isUpdated(false)
                 .sourceImage(sourceImage)
                 .build();
