@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import sejong.capston.yechef.domain.Recipe.Recipe;
+import sejong.capston.yechef.global.entity.BaseEntity;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ import sejong.capston.yechef.domain.Recipe.Recipe;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE recipe_step SET is_deleted = true, deleted_at = now() where id = ?")
 @SQLRestriction("is_deleted is FALSE")
-public class RecipeStep {
+public class RecipeStep extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

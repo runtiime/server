@@ -32,7 +32,7 @@ public class RecipeController {
     @PostMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RecipeDto> createRecipe(
             @Parameter(description = "회원 ID", required = true)
-            @PathVariable Long memberId,
+            @PathVariable("memberId") Long memberId,
 
             @Parameter(description = "GPT 파싱 결과 JSON (문자열 형태)", required = true)
             @RequestPart("dto") String dtoText,  // String으로 먼저 받음
@@ -59,23 +59,21 @@ public class RecipeController {
     @GetMapping("/{recipeId}")
   public ResponseEntity<RecipeDto> getRecipe(
           @Parameter(description = "조회할 레시피 ID", required = true)
-          @PathVariable Long recipeId
+          @PathVariable("recipeId") Long recipeId
   ) {
     return ResponseEntity.ok(recipeService.getRecipe(recipeId));
   }
 
-  @DeleteMapping("/{recipeId}")
+  @DeleteMapping("/members/{memberId}/recipes/{recipeId}")
   public ResponseEntity<Void> deleteRecipe(
-          @Parameter(description = "사용자 ID (테스트용)", required = true)
-          @RequestParam Long memberId,
-
-          @Parameter(description = "삭제할 레시피 ID", required = true)
-          @PathVariable Long recipeId
+      @PathVariable("memberId") Long memberId,
+      @PathVariable("recipeId") Long recipeId
   ) {
     recipeService.delete(memberId, recipeId);
     return ResponseEntity.noContent().build();
   }
-  
+
+
   @GetMapping("/public")
   public ResponseEntity<List<Recipe>> getPublicRecipes() {
     return ResponseEntity.ok(recipeService.getPublicRecipes());

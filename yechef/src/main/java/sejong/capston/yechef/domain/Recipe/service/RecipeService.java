@@ -69,7 +69,6 @@ public class RecipeService {
 
     // MemberRecipe 연결
     MemberRecipe memberRecipe = MemberRecipe.of(member, recipe);
-    memberRecipeRepository.save(memberRecipe);
 
     // Member 연결
     memberRecipeRepository.save(memberRecipe);
@@ -99,26 +98,39 @@ public class RecipeService {
 
   @Transactional
   public void delete(Long memberId, Long recipeId) {
+    // 1. 현재 사용자의 MemberRecipe 조회
     MemberRecipe memberRecipe = memberRecipeRepository.findByMemberIdAndRecipeId(memberId, recipeId)
         .orElseThrow(() -> BaseException.from(ErrorCode.NOT_RECIPE_OWNER));
 
     Recipe recipe = memberRecipe.getRecipe();
 
-    // 1. 썸네일 이미지 삭제
-    if (recipe.getThumbnailImage() != null) {
-      String thumbnailKey = recipe.getThumbnailImage().getS3Key();
-      if (thumbnailKey != null) {
-        s3UploadService.deleteFile(thumbnailKey);
+    // 2. MemberRecipe 삭제
+    memberRecipeRepository.delete(memberRecipe);
+
+    // 3. 해당 recipe가 다른 멤버에게 공유되지 않았다면 실제로 삭제
+    long remainingLinks = memberRecipeRepository.countByRecipeId(recipeId);
+    if (remainingLinks == 0) {
+      // 3-1. 썸네일 S3 삭제
+      if (recipe.getThumbnailImage() != null) {
+        String thumbnailKey = recipe.getThumbnailImage().getS3Key();
+        if (thumbnailKey != null) {
+          s3UploadService.deleteFile(thumbnailKey);
+        }
       }
+
+      // 3-2. 원본 이미지 S3 삭제
+      if (recipe.getSourceImage() != null) {
+        String sourceKey = recipe.getSourceImage().getS3Key();
+        if (sourceKey != null) {
+          s3UploadService.deleteFile(sourceKey);
+        }
+      }
+
+      // 3-3. 레시피 삭제 (Image는 cascade + orphanRemoval)
+      recipeRepository.delete(recipe);
     }
-    
-    // 2. 사용자 원본 이미지 삭제
-    if (recipe.getSourceImage() != null) {
-      s3UploadService.deleteFile(recipe.getSourceImage().getS3Key());
-    }
-    // 3. 레시피 삭제 (Image는 cascade + orphanRemoval로 자동 삭제됨)
-    recipeRepository.delete(recipe);
   }
+
 
   @Transactional
   public void toggleLike(Long memberId, Long recipeId) {
@@ -157,6 +169,48 @@ public class RecipeService {
 
   public List<Recipe> getPublicRecipes() {
     return recipeRepository.findByRecipeType(Recipe.RecipeType.PUBLIC);
+  }
+
+  @Transactional(readOnly = true)
+  public RecipeDto getRecipeFromMemberRecipe(Long memberRecipeId) {
+    MemberRecipe mr = memberRecipeRepository.findById(memberRecipeId)
+        .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_RECIPE_NOT_FOUND));
+
+    return RecipeDto.from(mr.getRecipe());
+  }
+
+  @Transactional
+  public void deleteMemberRecipe(Long memberId, Long memberRecipeId) {
+    MemberRecipe memberRecipe = memberRecipeRepository.findById(memberRecipeId)
+        .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_RECIPE_NOT_FOUND));
+
+    // 다른 사람이 요청한 경우 차단
+    if (!memberRecipe.getMember().getId().equals(memberId)) {
+      throw BaseException.from(ErrorCode.NOT_RECIPE_OWNER);
+    }
+
+    Recipe recipe = memberRecipe.getRecipe();
+
+    // 좋아요만 누른 경우 → 연결만 삭제
+    if (!memberRecipe.getIsOwner()) {
+      memberRecipeRepository.delete(memberRecipe);
+      return;
+    }
+
+    // 소유자인 경우 → 연결 삭제 후 레시피 사용 여부 확인
+    memberRecipeRepository.delete(memberRecipe);
+
+    long count = memberRecipeRepository.countByRecipeId(recipe.getId());
+    if (count == 0) {
+      if (recipe.getThumbnailImage() != null) {
+        s3UploadService.deleteFile(recipe.getThumbnailImage().getS3Key());
+      }
+      if (recipe.getSourceImage() != null) {
+        s3UploadService.deleteFile(recipe.getSourceImage().getS3Key());
+      }
+
+      recipeRepository.delete(recipe);
+    }
   }
 
 }

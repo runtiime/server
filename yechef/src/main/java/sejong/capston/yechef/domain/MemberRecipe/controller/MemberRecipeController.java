@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +51,15 @@ public class MemberRecipeController {
       @PathVariable("memberRecipeId") Long memberRecipeId
   ) {
     return ResponseEntity.ok(recipeService.getRecipeFromMemberRecipe(memberRecipeId));
+  }
+
+  @DeleteMapping("/members/{memberId}/member-recipes/{memberRecipeId}")
+  public ResponseEntity<Void> deleteMemberRecipe(
+      @PathVariable("memberId") Long memberId,
+      @PathVariable("memberRecipeId") Long memberRecipeId
+  ) {
+    recipeService.deleteMemberRecipe(memberId, memberRecipeId);
+    return ResponseEntity.noContent().build();
   }
 
 }
