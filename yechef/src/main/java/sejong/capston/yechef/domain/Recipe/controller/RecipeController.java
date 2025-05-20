@@ -23,7 +23,8 @@ public class RecipeController {
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public RecipeDto createRecipe(
-      @AuthenticationPrincipal LoginMemberDto user,
+      LoginMemberDto user,
+      //@AuthenticationPrincipal LoginMemberDto user,
       @RequestPart("data") RecipeParseResultDto dto,
       @RequestPart("sourceImage") MultipartFile sourceImageFile
   ) {
@@ -37,7 +38,8 @@ public class RecipeController {
 
   @DeleteMapping("/{recipeId}")
   public ResponseEntity<Void> deleteRecipe(
-      @AuthenticationPrincipal LoginMemberDto user,
+      LoginMemberDto user,
+      //@AuthenticationPrincipal LoginMemberDto user,
       @PathVariable Long recipeId
   ) {
     recipeService.delete(user.getId(), recipeId);
