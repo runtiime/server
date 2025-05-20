@@ -42,6 +42,16 @@ public class MemberService {
   }
 
   @Transactional
+  public MemberDto getMemberId(String nickname) {
+    Member member = memberRepository.findByNickname(nickname)
+            .orElseThrow(() -> {
+              log.error("회원 조회 실패: name: {}", nickname);
+              return BaseException.from(ErrorCode.MEMBER_NOT_FOUND);
+            });
+    return toDto(member);
+  }
+
+  @Transactional
   public MemberDto updateMember(Long memberId, MemberUpdateDto updateDto) {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));

@@ -19,7 +19,8 @@ public class Member extends BaseEntity {
   private Long id;
 
   @NonNull private String nickname;
-  @NonNull private Long oauthId;
+  // 개발용 임시 제거 @NotNull private Long oauthId;
+  private Long oauthId;
   @Column(unique = true) private String email;
   private boolean showExamplePhoto = true;
 

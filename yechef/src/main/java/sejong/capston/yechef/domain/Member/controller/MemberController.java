@@ -27,10 +27,17 @@ public class MemberController {
     return ResponseEntity.created(URI.create("/api/users/" + result.getId())).body(result);
   }
 
-  @Operation(summary = "회원 정보 조회")
+  @Operation(summary = "회원 정보 id로 조회")
   @GetMapping("/{memberId}")
   public ResponseEntity<MemberDto> getMemberInfo(@PathVariable("memberId") Long memberId) {
     MemberDto memberDto = memberService.getMemberInfo(memberId);
+    return ResponseEntity.ok(memberDto);
+  }
+
+  @Operation(summary = "회원 정보 nickname으로 조회")
+  @GetMapping("/nickname/{nickname}")
+  public ResponseEntity<MemberDto> getMemberIdFromName(@PathVariable("nickname") String nickname) {
+    MemberDto memberDto = memberService.getMemberId(nickname);
     return ResponseEntity.ok(memberDto);
   }
 
