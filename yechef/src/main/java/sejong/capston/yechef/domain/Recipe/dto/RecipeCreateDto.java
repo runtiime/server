@@ -8,4 +8,5 @@ import sejong.capston.yechef.domain.Recipe.Recipe;
 public class RecipeCreateDto {
   private String title;
   private Recipe.RecipeType recipeType;
+  private int servings;
 }

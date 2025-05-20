@@ -32,7 +32,8 @@ public class RecipeService {
 
     Recipe recipe = Recipe.of(dto.getTitle(),
             member.getNickname(),
-            dto.getRecipeType());
+            dto.getRecipeType(),
+            dto.getServings());
     recipeRepository.save(recipe);
 
     MemberRecipe memberRecipe = MemberRecipe.builder()

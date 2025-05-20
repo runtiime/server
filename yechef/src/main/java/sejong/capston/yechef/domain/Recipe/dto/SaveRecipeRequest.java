@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 public class SaveRecipeRequest {
     private String title;
+    private int servings;
     private List<IngredientDto> ingredients;
     private List<RecipeStepDto> steps;
 }

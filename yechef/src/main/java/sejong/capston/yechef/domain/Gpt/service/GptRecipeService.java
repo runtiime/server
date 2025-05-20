@@ -39,7 +39,8 @@ public class GptRecipeService {
             .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
 
         // Recipe 저장
-        Recipe recipe = Recipe.of(request.getTitle(), member.getNickname(), Recipe.RecipeType.PRIVATE);
+        Recipe recipe = Recipe.of(request.getTitle(), member.getNickname(), Recipe.RecipeType.PRIVATE,
+                request.getServings());
         recipeRepository.save(recipe);
 
         // MemberRecipe
