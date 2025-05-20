@@ -106,8 +106,12 @@ public class RecipeService {
 
     // 1. 썸네일 이미지 삭제
     if (recipe.getThumbnailImage() != null) {
-      s3UploadService.deleteFile(recipe.getThumbnailImage().getS3Key());
+      String thumbnailKey = recipe.getThumbnailImage().getS3Key();
+      if (thumbnailKey != null) {
+        s3UploadService.deleteFile(thumbnailKey);
+      }
     }
+    
     // 2. 사용자 원본 이미지 삭제
     if (recipe.getSourceImage() != null) {
       s3UploadService.deleteFile(recipe.getSourceImage().getS3Key());
