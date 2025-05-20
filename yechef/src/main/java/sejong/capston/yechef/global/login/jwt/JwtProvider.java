@@ -21,7 +21,8 @@ import java.util.Date;
 @Slf4j
 public class JwtProvider {
     private final Key KEY;
-    private final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
+    // 개발 기간 동안만 1주일 허용; 1000ms * 60s * 60m * 24h * 7d
+    private final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 7;
 
     public JwtProvider(@Value("${JWT_SECRET}") String secret) {
         this.KEY = Keys.hmacShaKeyFor(secret.getBytes());
