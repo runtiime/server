@@ -28,7 +28,7 @@ public class RecipeProgressService {
   private final IngredientRepository ingredientRepository;
   private final GptService gptService;
 
-  public RecipeStepDto processStep(Long recipeId, int stepNumber, String userInput) {
+  public RecipeStepDto processStep(Long memberId, Long recipeId, int stepNumber, String userInput) {
     Recipe recipe = recipeRepository.findById(recipeId)
         .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
 
