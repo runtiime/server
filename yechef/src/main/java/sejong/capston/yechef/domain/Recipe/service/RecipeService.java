@@ -17,6 +17,7 @@ import sejong.capston.yechef.domain.Member.repository.MemberRepository;
 import sejong.capston.yechef.domain.MemberRecipe.MemberRecipe;
 import sejong.capston.yechef.domain.MemberRecipe.repository.MemberRecipeRepository;
 import sejong.capston.yechef.domain.Recipe.Recipe;
+import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.SaveRecipeRequest;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
@@ -90,10 +91,10 @@ public class RecipeService {
   }
 
   @Transactional(readOnly = true)
-  public RecipeDto getRecipe(Long recipeId) {
+  public DetailRecipeDto getRecipe(Long recipeId) {
     Recipe recipe = recipeRepository.findById(recipeId)
         .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
-    return RecipeDto.from(recipe);
+    return DetailRecipeDto.from(recipe);
   }
 
   @Transactional
