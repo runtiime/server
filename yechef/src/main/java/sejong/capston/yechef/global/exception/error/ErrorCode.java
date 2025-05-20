@@ -30,6 +30,7 @@ public enum ErrorCode {
     NOT_RECIPE_OWNER("RCP-0001", "해당 사용자의 레시피가 아닙니다.", ErrorDisplayType.POPUP),
     NO_RECIPE_INFO_OF_LIKE("RCP-0002", "레시피 좋아요 정보가 없습니다.", ErrorDisplayType.POPUP),
     NOT_EXIST_THIS_STEP("RCP-0003", "레시피 해당 단계가 존재하지 않습니다.", ErrorDisplayType.POPUP),
+    RECIPE_SAVE_FAILED("RCP-0004", "레시피 저장 실패", ErrorDisplayType.POPUP),
 
     //gpt
     GPT_RESPONSE_PARSING_FAILED("GPT-0000", "GPT 응답 파싱에 실패했습니다.", ErrorDisplayType.POPUP),
@@ -37,9 +38,11 @@ public enum ErrorCode {
     //s3
     FILE_UPLOAD_FAIL("S3-001", "파일 업로드에 실패했습니다.", ErrorDisplayType.TOAST),
     FILE_DELETE_FAIL("S3-002", "파일 삭제에 실패했습니다.", ErrorDisplayType.TOAST),
+    FILE_UPLOAD_FAILED("S3-003", "파일 저장 실패", ErrorDisplayType.POPUP),
 
     // kakao img api
-    KAKAO_API_ERROR("K-001", "카카오 이미지 검색 중 오류 발생", ErrorDisplayType.TOAST)
+    KAKAO_API_ERROR("K-001", "카카오 이미지 검색 중 오류 발생", ErrorDisplayType.POPUP),
+    IMAGE_SAVE_FAILED("K-002", "카카오 이미지 저장 실패", ErrorDisplayType.POPUP)
     ;
 
     private final String code;

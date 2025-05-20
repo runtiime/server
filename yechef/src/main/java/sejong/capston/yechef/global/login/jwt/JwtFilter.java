@@ -41,9 +41,9 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String token = resolveToken(request);
 
-            if (token != null && jwtProvider.validateToken(token)) {
+            if (token != null && jwtProvider.validateAccessToken(token)) {
 
-                LoginMemberDto jwtLoginMemberDto = jwtProvider.getMemberDto(token);
+                LoginMemberDto jwtLoginMemberDto = jwtProvider.getMemberDtoFromToken(token);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         jwtLoginMemberDto, null, jwtLoginMemberDto.getAuthorities());

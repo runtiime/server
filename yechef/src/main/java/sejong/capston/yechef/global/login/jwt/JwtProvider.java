@@ -2,11 +2,14 @@ package sejong.capston.yechef.global.login.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 import sejong.capston.yechef.domain.Member.Member;
 import sejong.capston.yechef.global.exception.BaseException;
@@ -16,80 +19,95 @@ import sejong.capston.yechef.domain.Member.dto.LoginMemberDto;
 import java.security.Key;
 import java.util.Date;
 
-
 @Component
 @Slf4j
 public class JwtProvider {
     private final Key KEY;
-    // 개발 기간 동안만 1주일 허용; 1000ms * 60s * 60m * 24h * 7d
-    private final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 7;
+    private final long accessTokenExpireMs;
+    private final long refreshTokenExpireMs;
 
-    public JwtProvider(@Value("${JWT_SECRET}") String secret) {
+    public JwtProvider(
+            @Value("${JWT_SECRET}") String secret,
+            @Value("${JWT_EXPIRATION}") long accessTokenExpireMs,
+            @Value("${JWT_REFRESH_EXPIRATION}") long refreshTokenExpireMs
+    ) {
         this.KEY = Keys.hmacShaKeyFor(secret.getBytes());
+        this.accessTokenExpireMs = accessTokenExpireMs;
+        this.refreshTokenExpireMs = refreshTokenExpireMs;
     }
 
-    // JWT 생성
-    public String createAccessToken(LoginMemberDto loginMemberDto) {
+    // Access Token 생성
+    public String createAccessToken(LoginMemberDto dto) {
         Claims claims = Jwts.claims();
-        claims.put("memberId", loginMemberDto.getId());
-        claims.put("username", loginMemberDto.getUsername());
-        claims.put("role", loginMemberDto.getRole());
+        claims.put("memberId", dto.getId());
+        claims.put("nickname", dto.getUsername());
+        claims.put("role", dto.getRole());
+        claims.put("type", "access");
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpireMs))
                 .signWith(KEY)
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    // Refresh Token 생성
+    public String createRefreshToken(LoginMemberDto dto) {
+        Claims claims = Jwts.claims();
+        claims.put("memberId", dto.getId());
+        claims.put("nickname", dto.getUsername());
+        claims.put("role", dto.getRole());
+        claims.put("type", "refresh");
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpireMs))
+                .signWith(KEY)
+                .compact();
+    }
+
+    // Token 검증: Access, Refresh 공용
+    public Claims parseClaims(String token) {
         try {
-            Claims claims = parseClaims(token);
-            log.info("토큰 검증 완료 - userId : {}, role : {}, 만료시간 : {}", claims.get("userId"),claims.get("role"), claims.getExpiration());
-            return true;
+            Jws<Claims> jws = Jwts.parserBuilder()
+                    .setSigningKey(KEY)
+                    .build()
+                    .parseClaimsJws(token);
+            return jws.getBody();
         } catch (ExpiredJwtException e) {
-            log.error("만료된 JWT: {}", e.getMessage());
+            log.warn("만료된 JWT: {}", e.getMessage());
             throw BaseException.from(ErrorCode.JWT_TOKEN_EXPIRED);
-        } catch (JwtException e) {
-            log.error("JWT 파싱 실패: {}", e.getMessage());
+        } catch (JwtException | IllegalArgumentException e) {
+            log.error("유효하지 않은 JWT: {}", e.getMessage());
             throw BaseException.from(ErrorCode.INVALID_JWT_TOKEN);
         }
     }
 
-    // JWT에서 사용자 ID 추출
-    public Long getmemberIdFromToken(String token) {
+    public boolean validateAccessToken(String token) {
         Claims claims = parseClaims(token);
-        return claims.get("memberId", Long.class);
+        if (!"access".equals(claims.get("type", String.class))) {
+            throw BaseException.from(ErrorCode.INVALID_JWT_TOKEN);
+        }
+        return true;
     }
 
-    //JWT에서 사용자 이름 추출
-    public String getNicknameFromToken(String token) {
+    public boolean validateRefreshToken(String token) {
         Claims claims = parseClaims(token);
-        return claims.get("nickname", String.class);
+        if (!"refresh".equals(claims.get("type", String.class))) {
+            throw BaseException.from(ErrorCode.INVALID_JWT_TOKEN);
+        }
+        return true;
     }
 
-    //JWT에서 사용자 권한 추출
-    public Member.Role getRoleFromToken(String token) {
-        Claims claims = parseClaims(token);
-        String role = claims.get("role", String.class);
-        return Member.Role.valueOf(role);
-    }
-
-    //JWT에서 userDto 추출
-    public LoginMemberDto getMemberDto(String token) {
+    // JWT → LoginMemberDto
+    public LoginMemberDto getMemberDtoFromToken(String token) {
+        Claims c = parseClaims(token);
         return LoginMemberDto.fromJwt(
-                getmemberIdFromToken(token),
-                getNicknameFromToken(token),
-                getRoleFromToken(token)
+                c.get("memberId", Long.class),
+                c.get("nickname", String.class),
+                Member.Role.valueOf(c.get("role", String.class))
         );
-    }
-
-
-    private Claims parseClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
     }
 }
