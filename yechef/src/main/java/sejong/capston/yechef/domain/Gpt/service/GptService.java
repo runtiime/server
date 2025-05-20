@@ -49,17 +49,8 @@ public class GptService {
         2. action 값은 짧은 한국어 동사 또는 동사구여야 합니다. (예: "떡 준비", "칼집 넣기")
         3. description에는 어떤 재료를 어떻게 다루는지, 시간, 온도 등 구체 정보를 포함합니다.
         4. 출력은 반드시 JSON만 포함되도록 하세요. 설명이나 마크다운 블록 없이 반환합니다.
-        
-        반드시 지켜야할 것
-        "steps" 내부의 "stepNumber" 키 값의 value는 제일 처음 생성되는 값이 1이며,
-        1부터 시작하여 순차적으로 1씩 무조건 !! 증가합니다. 절대 0 이 될 수 없습니다.(ex. 1,2,3 ...)
-        "steps": [
-            { "stepNumber": 1, "action": "<단일 행위>", "description": "<상세 설명>" },
-            { "stepNumber": 2, "action": "<단일 행위>", "description": "<상세 설명>" },
-            { "stepNumber": 3, "action": "<단일 행위>", "description": "<상세 설명>" },
-            …
-            …
-          ]
+        5. steps 배열의 각 항목에는 "stepNumber" 필드가 반드시 있어야 하며, 그 값은 **1부터 시작해 1씩 순차 증가**해야 합니다. 
+        절대로 0이거나 중복되면 안 됩니다. (예: 1, 2, 3, …)
         """;
 
         // GPT 호출
@@ -86,11 +77,10 @@ public class GptService {
                 ));
             }
 
-            // 단계
             List<RecipeStepDto> steps = new ArrayList<>();
             for (JsonNode stepNode : root.path("steps")) {
                 steps.add(RecipeStepDto.builder()
-                        .stepNumber(stepNode.path("order").asInt(0))
+                        .stepNumber(stepNode.path("stepNumber").asInt())
                         .action(stepNode.path("action").asText(""))
                         .description(stepNode.path("description").asText(""))
                         .build()
