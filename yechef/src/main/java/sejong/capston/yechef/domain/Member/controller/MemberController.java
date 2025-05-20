@@ -43,7 +43,7 @@ public class MemberController {
 
   @Operation(summary = "회원 정보 수정")
   @PutMapping("/{memberId}")
-  public ResponseEntity<MemberDto> updateMember(@PathVariable Long memberId,
+  public ResponseEntity<MemberDto> updateMember(@PathVariable("memberId") Long memberId,
       @RequestBody MemberUpdateDto updateDto) {
     MemberDto result = memberService.updateMember(memberId, updateDto);
     return ResponseEntity.ok(result);
@@ -51,7 +51,7 @@ public class MemberController {
 
   @Operation(summary = "회원 삭제")
   @DeleteMapping("/{memberId}")
-  public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
+  public ResponseEntity<Void> deleteMember(@PathVariable("memberId") Long memberId) {
     memberService.deleteMember(memberId);
     return ResponseEntity.noContent().build();
   }

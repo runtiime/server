@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Recipe.Recipe;
+import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
 import sejong.capston.yechef.domain.Recipe.service.RecipeService;
 
@@ -54,15 +55,15 @@ public class RecipeController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-
-    @GetMapping("/{recipeId}")
-  public ResponseEntity<RecipeDto> getRecipe(
-          @Parameter(description = "조회할 레시피 ID", required = true)
-          @PathVariable("recipeId") Long recipeId
+    
+  @GetMapping("/{recipeId}")
+  public ResponseEntity<DetailRecipeDto> getRecipe(
+      @Parameter(description = "조회할 레시피 ID", required = true)
+      @PathVariable("recipeId") Long recipeId
   ) {
     return ResponseEntity.ok(recipeService.getRecipe(recipeId));
   }
+
 
   @DeleteMapping("/members/{memberId}/recipes/{recipeId}")
   public ResponseEntity<Void> deleteRecipe(
