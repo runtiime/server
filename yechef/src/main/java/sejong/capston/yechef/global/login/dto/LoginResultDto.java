@@ -10,6 +10,7 @@ import sejong.capston.yechef.domain.Member.Member;
 @AllArgsConstructor
 public class LoginResultDto {
     private String jwtToken;
+    private Long memberId;
     private String userName;
     //private Member.Role role;
 }

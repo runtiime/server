@@ -38,7 +38,7 @@ public class LoginService {
         String jwt = jwtProvider.createAccessToken(LoginMemberDto.fromEntity(member));
         log.info("jwt 생성 완료 : {}", jwt);
 
-        return new LoginResultDto(jwt, member.getNickname());
+        return new LoginResultDto(jwt, member.getId(), member.getNickname());
     }
 
     private Member loginOrRegister(KakaoResponseDto userInfo) {
