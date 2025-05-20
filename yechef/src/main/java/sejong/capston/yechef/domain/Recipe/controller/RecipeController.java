@@ -3,6 +3,7 @@ package sejong.capston.yechef.domain.Recipe.controller;
 import java.net.URI;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
@@ -28,24 +29,34 @@ import sejong.capston.yechef.domain.Recipe.service.RecipeService;
 public class RecipeController {
 
   private final RecipeService recipeService;
-  @PostMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<RecipeDto> createRecipe(
-          @Parameter(description = "회원 ID", required = true)
-          @PathVariable Long memberId,
+    @PostMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<RecipeDto> createRecipe(
+            @Parameter(description = "회원 ID", required = true)
+            @PathVariable Long memberId,
 
-          @Parameter(description = "GPT 파싱 결과 JSON", required = true)
-          @RequestPart("dto") RecipeParseResultDto dto,
+            @Parameter(description = "GPT 파싱 결과 JSON (문자열 형태)", required = true)
+            @RequestPart("dto") String dtoText,  // String으로 먼저 받음
 
-          @Parameter(description = "레시피 이미지 파일", required = true)
-          @RequestPart("sourceImageFile") MultipartFile sourceImageFile
-  ) {
-    RecipeDto result = recipeService.create(memberId, dto, sourceImageFile);
-    return ResponseEntity
-            .created(URI.create("/api/recipes/" + result.getId()))
-            .body(result);
-  }
+            @Parameter(description = "레시피 이미지 파일", required = true)
+            @RequestPart("sourceImageFile") MultipartFile sourceImageFile
+    ) {
+        try {
+            // 문자열 → 객체 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            RecipeParseResultDto dto = objectMapper.readValue(dtoText, RecipeParseResultDto.class);
 
-  @GetMapping("/{recipeId}")
+            RecipeDto result = recipeService.create(memberId, dto, sourceImageFile);
+            return ResponseEntity
+                    .created(URI.create("/api/recipes/" + result.getId()))
+                    .body(result);
+        } catch (Exception e) {
+            // 파싱 실패 시 예외 처리
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+    @GetMapping("/{recipeId}")
   public ResponseEntity<RecipeDto> getRecipe(
           @Parameter(description = "조회할 레시피 ID", required = true)
           @PathVariable Long recipeId
