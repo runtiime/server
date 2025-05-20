@@ -36,6 +36,7 @@ public enum ErrorCode {
 
     //s3
     FILE_UPLOAD_FAIL("S3-001", "파일 업로드에 실패했습니다.", ErrorDisplayType.TOAST),
+    FILE_DELETE_FAIL("S3-002", "파일 삭제에 실패했습니다.", ErrorDisplayType.TOAST),
 
     // kakao img api
     KAKAO_API_ERROR("K-001", "카카오 이미지 검색 중 오류 발생", ErrorDisplayType.TOAST)
