@@ -56,4 +56,12 @@ public class MemberRecipe extends BaseEntity {
     this.isOwner = isOwner != null ? isOwner : false;
   }
 
+  public static MemberRecipe of(Member member, Recipe recipe) {
+    return MemberRecipe.builder()
+            .member(member)
+            .recipe(recipe)
+            .isOwner(true)   // GPT로 생성된 레시피는 사용자가 생성자
+            .isLiked(false)  // 초기 상태는 좋아요 없음
+            .build();
+  }
 }

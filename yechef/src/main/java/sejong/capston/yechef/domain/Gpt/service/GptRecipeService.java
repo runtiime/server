@@ -42,13 +42,8 @@ public class GptRecipeService {
         Recipe recipe = Recipe.of(request.getTitle(), member.getNickname(), Recipe.RecipeType.PRIVATE);
         recipeRepository.save(recipe);
 
-        // MemberRecipe 연결 저장 (수정된 부분)
-        MemberRecipe memberRecipe = MemberRecipe.builder()
-            .member(member)
-            .recipe(recipe)
-            .isOwner(true)   // GPT로 생성된 레시피는 사용자 본인이 만든 것이므로 true
-            .isLiked(false)  // 초기 상태는 좋아요 X
-            .build();
+        // MemberRecipe
+        MemberRecipe memberRecipe = MemberRecipe.of(member, recipe);
         memberRecipeRepository.save(memberRecipe);
 
         // Ingredient / RecipeStep 저장
