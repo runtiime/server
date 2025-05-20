@@ -37,7 +37,8 @@ public class SecurityConfig {
                         "/bot", "/bot/**",  // gpt api
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
-                        "/api/images"
+                        "/api/images",
+                        "/api/recipes/**"
                 ).permitAll()
 
 
