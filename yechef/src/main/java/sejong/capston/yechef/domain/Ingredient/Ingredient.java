@@ -25,7 +25,7 @@ public class Ingredient extends BaseEntity {
 
     @NotNull private String originalAmount;
 
-    @NotNull private String oneServingAmount;
+    private String oneServingAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
