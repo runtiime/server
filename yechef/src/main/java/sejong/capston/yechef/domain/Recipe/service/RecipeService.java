@@ -63,6 +63,7 @@ public class RecipeService {
             member.getNickname(),
             Recipe.RecipeType.PRIVATE,
             recipeDto.getServings(),
+            recipeDto.getText(),
             sourceImage);
     recipeRepository.save(recipe);
 

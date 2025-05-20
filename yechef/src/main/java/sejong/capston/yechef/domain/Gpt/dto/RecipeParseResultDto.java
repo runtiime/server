@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RecipeParseResultDto {
     private String title;
+    private String text;    // 음식 한 줄 설명
     private int servings;
     private List<IngredientDto> ingredients;
     private List<RecipeStepDto> steps;
