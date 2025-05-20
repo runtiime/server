@@ -15,5 +15,6 @@ public interface MemberRecipeRepository extends JpaRepository<MemberRecipe, Long
   @Query("SELECT mr.recipe FROM MemberRecipe mr WHERE mr.member.id = :memberId AND mr.isLiked = true")
   List<Recipe> findLikedRecipesByMemberId(@Param("memberId") Long memberId);
 
+  long countByRecipeId(Long recipeId);
 }
 

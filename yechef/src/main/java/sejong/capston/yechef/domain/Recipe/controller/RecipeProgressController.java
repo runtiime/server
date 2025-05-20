@@ -20,9 +20,9 @@ public class RecipeProgressController {
 
   @PostMapping("/{recipeId}/step/{stepNumber}/progress")
   public RecipeStepDto progressStep(
-      @PathVariable Long memberId,
-      @PathVariable Long recipeId,
-      @PathVariable int stepNumber,
+      @PathVariable("memberId") Long memberId,
+      @PathVariable("recipeId") Long recipeId,
+      @PathVariable("stepNumber") int stepNumber,
       @RequestBody VoiceInputDto input
   ) {
     return progressService.processStep(memberId, recipeId, stepNumber, input.getText());
