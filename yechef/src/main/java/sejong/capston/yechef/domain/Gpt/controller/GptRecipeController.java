@@ -22,9 +22,8 @@ public class GptRecipeController {
     @PostMapping("/save")
     public RecipeResponseDto saveRecipe(
             @RequestParam Long memberId,
-            @RequestParam String rawRecipe,
             @RequestBody SaveRecipeRequest request
     ) {
-        return gptRecipeService.createFromRaw(memberId, rawRecipe, request);
+        return gptRecipeService.saveMyNewRecipe(memberId, request);
     }
 }

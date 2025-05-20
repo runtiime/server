@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Ingredient.service.IngredientService;
 import sejong.capston.yechef.domain.Member.Member;
 import sejong.capston.yechef.domain.Member.repository.MemberRepository;
@@ -31,35 +30,25 @@ public class GptRecipeService {
     private final MemberRepository memberRepository;
     private final MemberRecipeRepository memberRecipeRepository;
     @Transactional
-    public RecipeResponseDto createFromRaw(
+    public RecipeResponseDto saveMyNewRecipe(
             Long memberId,
-            String rawRecipe,
             SaveRecipeRequest request
     ) {
         // 회원 확인
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
 
-        // GPT로 파싱 (제목, 재료, 단계)
-        RecipeParseResultDto parsed = gptService.parseRecipe(rawRecipe);
-
         // Recipe 저장
-        Recipe recipe = Recipe.of(parsed.getTitle(), member.getNickname(), request.getRecipeType());
+        Recipe recipe = Recipe.of(request.getTitle(), member.getNickname(), Recipe.RecipeType.PRIVATE);
         recipeRepository.save(recipe);
 
-
-        // MemberRecipe 연결 저장 (수정된 부분)
-        MemberRecipe memberRecipe = MemberRecipe.builder()
-            .member(member)
-            .recipe(recipe)
-            .isOwner(true)   // GPT로 생성된 레시피는 사용자 본인이 만든 것이므로 true
-            .isLiked(false)  // 초기 상태는 좋아요 X
-            .build();
+        // MemberRecipe
+        MemberRecipe memberRecipe = MemberRecipe.of(member, recipe);
         memberRecipeRepository.save(memberRecipe);
 
         // Ingredient / RecipeStep 저장
-        ingredientService.saveIngredients(parsed.getIngredients(), recipe);
-        recipeStepService.saveSteps(parsed.getSteps(), recipe);
+        ingredientService.saveIngredients(request.getIngredients(), recipe);
+        recipeStepService.saveSteps(request.getSteps(), recipe);
 
         return RecipeResponseDto.from(recipe);
     }
