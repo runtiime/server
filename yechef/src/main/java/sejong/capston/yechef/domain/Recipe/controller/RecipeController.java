@@ -1,9 +1,11 @@
 package sejong.capston.yechef.domain.Recipe.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeCreateDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
 import sejong.capston.yechef.domain.Recipe.service.RecipeService;
@@ -38,5 +40,10 @@ public class RecipeController {
     return ResponseEntity.noContent().build();
   }
 
+  @GetMapping("/public")
+  public ResponseEntity<List<Recipe>> getPublicRecipes() {
+    List<Recipe> publicRecipes = recipeService.getPublicRecipes();
+    return ResponseEntity.ok(publicRecipes);
+  }
 
 }

@@ -101,5 +101,8 @@ public class RecipeService {
         .collect(Collectors.toList());
   }
 
+  public List<Recipe> getPublicRecipes() {
+    return recipeRepository.findByRecipeType(Recipe.RecipeType.PUBLIC);
+  }
 
 }
