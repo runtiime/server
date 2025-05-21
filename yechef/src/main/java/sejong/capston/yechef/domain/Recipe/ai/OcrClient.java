@@ -20,7 +20,7 @@ public class OcrClient {
   }
 
 
-  public RecipeParseResultDto extractText(MultipartFile imageFile) {
+  public String extractText(MultipartFile imageFile) {
     MultipartBodyBuilder builder = new MultipartBodyBuilder();
     builder.part("file", imageFile.getResource());
 
@@ -29,8 +29,8 @@ public class OcrClient {
         .contentType(MediaType.MULTIPART_FORM_DATA)
         .bodyValue(builder.build())
         .retrieve()
-        .bodyToMono(RecipeParseResultDto.class)
-        .block();
+        .bodyToMono(String.class)
+        .block();   // raw OCR text
   }
 
 }
