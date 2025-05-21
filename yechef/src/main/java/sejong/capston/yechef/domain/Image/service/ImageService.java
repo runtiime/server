@@ -3,6 +3,7 @@ package sejong.capston.yechef.domain.Image.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import sejong.capston.yechef.domain.Image.Image;
 import sejong.capston.yechef.domain.Image.repository.ImageRepository;
 import sejong.capston.yechef.domain.KakaoImage.service.KakaoImageService;
@@ -10,6 +11,7 @@ import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
 import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
+import sejong.capston.yechef.global.s3.service.S3UploadService;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,7 @@ public class ImageService {
   private final ImageRepository imageRepository;
   private final RecipeRepository recipeRepository;
   private final KakaoImageService kakaoImageService;
+  private final S3UploadService s3UploadService;
 
   @Transactional
   public void generateAndSaveThumbnail(Long recipeId) {
@@ -44,6 +47,19 @@ public class ImageService {
 
     // ex: https://bucket-name.s3.region.amazonaws.com/source-images/abc.jpg
     return url.substring(url.indexOf(".com/") + 5);
+  }
+
+  @Transactional
+  public Image saveImage(MultipartFile file) {
+    String s3Url = s3UploadService.uploadAndGenerateKey(file);
+    String s3Key = s3UploadService.extractKeyFromUrl(s3Url);
+
+    Image image = Image.builder()
+        .s3Url(s3Url)
+        .s3Key(s3Key)
+        .build();
+
+    return imageRepository.save(image);
   }
 
 }

@@ -3,19 +3,14 @@ package sejong.capston.yechef.domain.Recipe.controller;
 import java.net.URI;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Recipe.Recipe;
@@ -30,32 +25,30 @@ import sejong.capston.yechef.domain.Recipe.service.RecipeService;
 public class RecipeController {
 
   private final RecipeService recipeService;
-    @PostMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<RecipeDto> createRecipe(
-            @Parameter(description = "회원 ID", required = true)
-            @PathVariable("memberId") Long memberId,
 
-            @Parameter(description = "GPT 파싱 결과 JSON (문자열 형태)", required = true)
-            @RequestPart("dto") String dtoText,  // String으로 먼저 받음
+  // ✅ 레시피 저장 (AI에서 받은 OCR 결과 저장)
+  @PostMapping(value = "/{memberId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<RecipeDto> createRecipe(
+      @Parameter(description = "회원 ID", required = true)
+      @PathVariable("memberId") Long memberId,
 
-            @Parameter(description = "레시피 이미지 파일", required = true)
-            @RequestPart("sourceImageFile") MultipartFile sourceImageFile
-    ) {
-        try {
-            // 문자열 → 객체 변환
-            ObjectMapper objectMapper = new ObjectMapper();
-            RecipeParseResultDto dto = objectMapper.readValue(dtoText, RecipeParseResultDto.class);
+      @RequestBody RecipeParseResultDto dto
+  ) {
+    RecipeDto result = recipeService.create(memberId, dto);
+    return ResponseEntity
+        .created(URI.create("/api/recipes/" + result.getId()))
+        .body(result);
+  }
 
-            RecipeDto result = recipeService.create(memberId, dto, sourceImageFile);
-            return ResponseEntity
-                    .created(URI.create("/api/recipes/" + result.getId()))
-                    .body(result);
-        } catch (Exception e) {
-            // 파싱 실패 시 예외 처리
-            return ResponseEntity.badRequest().build();
-        }
-    }
-    
+  @PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<RecipeDto> createRecipeFromImage(
+      @RequestParam("memberId") Long memberId,
+      @RequestPart("image") MultipartFile imageFile) {
+    RecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
+    return ResponseEntity.ok(result);
+  }
+
+  // 상세 조회
   @GetMapping("/{recipeId}")
   public ResponseEntity<DetailRecipeDto> getRecipe(
       @Parameter(description = "조회할 레시피 ID", required = true)
@@ -64,7 +57,7 @@ public class RecipeController {
     return ResponseEntity.ok(recipeService.getRecipe(recipeId));
   }
 
-
+  // 삭제
   @DeleteMapping("/members/{memberId}/recipes/{recipeId}")
   public ResponseEntity<Void> deleteRecipe(
       @PathVariable("memberId") Long memberId,
@@ -74,7 +67,7 @@ public class RecipeController {
     return ResponseEntity.noContent().build();
   }
 
-
+  // 공개 목록 조회
   @GetMapping("/public")
   public ResponseEntity<List<Recipe>> getPublicRecipes() {
     return ResponseEntity.ok(recipeService.getPublicRecipes());
