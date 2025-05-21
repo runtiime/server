@@ -40,11 +40,11 @@ public class RecipeController {
         .body(result);
   }
 
-  // OCR용 이미지 업로드
-  @PostMapping(value = "/ocr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<RecipeParseResultDto> extractRecipeTextFormImage(
+  @PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<RecipeDto> createRecipeFromImage(
+      @RequestParam("memberId") Long memberId,
       @RequestPart("image") MultipartFile imageFile) {
-    RecipeParseResultDto result = recipeService.extractTextFromImage(imageFile);
+    RecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
     return ResponseEntity.ok(result);
   }
 

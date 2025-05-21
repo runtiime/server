@@ -174,12 +174,39 @@ public class RecipeService {
     }
   }
 
-  @Transactional
-  public RecipeParseResultDto extractTextFromImage(MultipartFile imageFile) {
-    String imageUrl = s3UploadService.uploadAndGenerateKey(imageFile);
-    RecipeParseResultDto result = ocrClient.extractText(imageUrl);
-    result.setSourceImageUrl(imageUrl);
-    return result;
+  public RecipeDto createRecipeFromImage(Long memberId, MultipartFile imageFile) {
+    // 1. 이미지 저장 (S3 + DB)
+    Image image = imageService.saveImage(imageFile);
+
+    // 2. OCR 수행 (imageFile로 Multipart 요청)
+    RecipeParseResultDto dto = ocrClient.extractText(imageFile);
+    dto.setSourceImageUrl(image.getS3Url());
+
+    // 3. 레시피 생성
+    Recipe recipe = createFromOcr(memberId, dto, image);
+    return RecipeDto.from(recipe);
+  }
+
+  public Recipe createFromOcr(Long memberId, RecipeParseResultDto dto, Image image) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
+
+    Recipe recipe = Recipe.of(
+        dto.getTitle(),
+        member.getNickname(),
+        Recipe.RecipeType.PRIVATE,
+        dto.getServings(),
+        dto.getText(),
+        image // 저장된 이미지 그대로 사용
+    );
+
+    recipeRepository.save(recipe);
+    memberRecipeRepository.save(MemberRecipe.of(member, recipe));
+    ingredientService.saveIngredients(dto.getIngredients(), recipe);
+    recipeStepService.saveSteps(dto.getSteps(), recipe);
+    imageService.generateAndSaveThumbnail(recipe.getId());
+
+    return recipe;
   }
 
 }
