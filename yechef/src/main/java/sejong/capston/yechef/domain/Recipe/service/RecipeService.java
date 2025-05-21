@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
+import sejong.capston.yechef.domain.Gpt.service.GptService;
 import sejong.capston.yechef.domain.Image.Image;
 import sejong.capston.yechef.domain.Image.repository.ImageRepository;
 import sejong.capston.yechef.domain.Image.service.ImageService;
@@ -36,6 +37,7 @@ public class RecipeService {
   private final ImageRepository imageRepository;
 
   private final ImageService imageService;
+  private final GptService gptService;
   private final S3UploadService s3UploadService;
   private final IngredientService ingredientService;
   private final RecipeStepService recipeStepService;
@@ -174,18 +176,23 @@ public class RecipeService {
     }
   }
 
+  @Transactional
   public RecipeDto createRecipeFromImage(Long memberId, MultipartFile imageFile) {
-    // 1. 이미지 저장 (S3 + DB)
+    // 1. 이미지 저장
     Image image = imageService.saveImage(imageFile);
 
-    // 2. OCR 수행 (imageFile로 Multipart 요청)
-    RecipeParseResultDto dto = ocrClient.extractText(imageFile);
+    // 2. OCR: raw text 추출
+    String rawText = ocrClient.extractText(imageFile);
+
+    // 3. GPT 파싱 요청
+    RecipeParseResultDto dto = gptService.parseRecipe(rawText);
     dto.setSourceImageUrl(image.getS3Url());
 
-    // 3. 레시피 생성
+    // 4. 레시피 생성
     Recipe recipe = createFromOcr(memberId, dto, image);
     return RecipeDto.from(recipe);
   }
+
 
   public Recipe createFromOcr(Long memberId, RecipeParseResultDto dto, Image image) {
     Member member = memberRepository.findById(memberId)

@@ -26,7 +26,7 @@ public class RecipeController {
 
   private final RecipeService recipeService;
 
-  // ✅ 레시피 저장 (AI에서 받은 OCR 결과 저장)
+  // 레시피 저장 (AI에서 받은 OCR 결과 저장)
   @PostMapping(value = "/{memberId}", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<RecipeDto> createRecipe(
       @Parameter(description = "회원 ID", required = true)
