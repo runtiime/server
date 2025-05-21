@@ -3,7 +3,9 @@ package sejong.capston.yechef.domain.Recipe.ai;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 
@@ -18,11 +20,14 @@ public class OcrClient {
   }
 
 
-  public RecipeParseResultDto extractText(String imageUrl) {
+  public RecipeParseResultDto extractText(MultipartFile imageFile) {
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    builder.part("file", imageFile.getResource());
+
     return webClient.post()
         .uri("/ocr/parse")
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(Map.of("imageUrl", imageUrl))
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .bodyValue(builder.build())
         .retrieve()
         .bodyToMono(RecipeParseResultDto.class)
         .block();
