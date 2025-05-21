@@ -1,6 +1,7 @@
 package sejong.capston.yechef.domain.KakaoImage.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -12,10 +13,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @Service
-@RequiredArgsConstructor
 public class KakaoImageService {
 
   private final WebClient kakaoImageWebClient;
+
+  public KakaoImageService(@Qualifier("kakaoImageWebClient") WebClient kakaoImageWebClient) {
+    this.kakaoImageWebClient = kakaoImageWebClient;
+  }
 
   /**
    * 카카오 이미지 검색 API 호출
