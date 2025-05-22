@@ -69,7 +69,7 @@ public class RecipeController {
 
   // 공개 목록 조회
   @GetMapping("/public")
-  public ResponseEntity<List<Recipe>> getPublicRecipes() {
+  public ResponseEntity<List<RecipeDto>> getPublicRecipes() {
     return ResponseEntity.ok(recipeService.getPublicRecipes());
   }
 }

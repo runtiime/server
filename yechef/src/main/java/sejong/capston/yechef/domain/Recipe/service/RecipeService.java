@@ -137,8 +137,12 @@ public class RecipeService {
     return likedRecipes.stream().map(RecipeDto::from).collect(Collectors.toList());
   }
 
-  public List<Recipe> getPublicRecipes() {
-    return recipeRepository.findByRecipeType(Recipe.RecipeType.PUBLIC);
+  public List<RecipeDto> getPublicRecipes() {
+    return recipeRepository
+        .findByRecipeType(Recipe.RecipeType.PUBLIC)
+        .stream()
+        .map(RecipeDto::from)
+        .collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
