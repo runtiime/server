@@ -13,6 +13,7 @@ public class RecipeDto {
   private String title;
   private String author;
   private Recipe.RecipeType recipeType;
+  private String text;
   private int likeCount;
   private String thumbnailImageUrl;
   private String sourceImageUrl;
@@ -25,6 +26,7 @@ public class RecipeDto {
         .author(recipe.getAuthor())
         .recipeType(recipe.getRecipeType())
         .likeCount(recipe.getLikeCount())
+        .text(recipe.getText())
         .thumbnailImageUrl(recipe.getThumbnailImage() != null ? recipe.getThumbnailImage().getS3Url() : null)
         .sourceImageUrl(recipe.getSourceImage() != null ? recipe.getSourceImage().getS3Url() : null)
         .build();
