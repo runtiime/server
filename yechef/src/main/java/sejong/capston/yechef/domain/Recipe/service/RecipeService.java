@@ -181,7 +181,7 @@ public class RecipeService {
   }
 
   @Transactional
-  public RecipeDto createRecipeFromImage(Long memberId, MultipartFile imageFile) {
+  public DetailRecipeDto createRecipeFromImage(Long memberId, MultipartFile imageFile) {
     // 1. 이미지 저장
     Image image = imageService.saveImage(imageFile);
 
@@ -194,7 +194,7 @@ public class RecipeService {
 
     // 4. 레시피 생성
     Recipe recipe = createFromOcr(memberId, dto, image);
-    return RecipeDto.from(recipe);
+    return DetailRecipeDto.from(recipe);
   }
 
 
