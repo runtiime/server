@@ -25,7 +25,7 @@ public class OcrClient {
     builder.part("file", imageFile.getResource());
 
     return webClient.post()
-        .uri("/ocr/parse")
+        .uri("/api/ocr")
         .contentType(MediaType.MULTIPART_FORM_DATA)
         .bodyValue(builder.build())
         .retrieve()
