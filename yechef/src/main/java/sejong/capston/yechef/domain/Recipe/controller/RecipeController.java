@@ -44,7 +44,7 @@ public class RecipeController {
   public ResponseEntity<RecipeDto> createRecipeFromImage(
       @RequestParam("memberId") Long memberId,
       @RequestPart("image") MultipartFile imageFile) {
-    RecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
+    DetailRecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
     return ResponseEntity.ok(result);
   }
 
