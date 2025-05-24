@@ -21,6 +21,7 @@ import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.ai.OcrClient;
 import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
+import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
 import sejong.capston.yechef.domain.RecipeSteps.service.RecipeStepService;
 import sejong.capston.yechef.global.exception.BaseException;

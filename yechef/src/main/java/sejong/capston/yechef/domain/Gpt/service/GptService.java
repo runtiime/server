@@ -9,7 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import sejong.capston.yechef.domain.Gpt.dto.*;
+import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
+import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
+import sejong.capston.yechef.domain.RecipeSteps.RecipeStep;
+import sejong.capston.yechef.domain.RecipeSteps.dto.RecipeStepDetailDto;
+import sejong.capston.yechef.domain.RecipeSteps.repository.RecipeStepRepository;
 import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
 
@@ -21,6 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GptService {
     private final RestTemplate restTemplate;
+    private final RecipeStepRepository recipeStepRepository;
+    private final RecipeRepository recipeRepository;
     @Value("${OPENAI_MODEL}")      private String    model;
     @Value("${OPENAI_API_URL}")    private String    apiUrl;
     private final ObjectMapper      objectMapper = new ObjectMapper();
@@ -85,10 +92,10 @@ public class GptService {
                 ));
             }
 
-            List<RecipeStepDto> steps = new ArrayList<>();
+            List<RecipeStepDetailDto> steps = new ArrayList<>();
             int index = 1;
             for (JsonNode stepNode : root.path("steps")) {
-                steps.add(RecipeStepDto.builder()
+                steps.add(RecipeStepDetailDto.builder()
                         .stepNumber(stepNode.path("order").asInt(index++))
                         .action(stepNode.path("action").asText(""))
                         .description(stepNode.path("description").asText(""))
@@ -114,5 +121,81 @@ public class GptService {
         return resp.getChoices().get(0).getMessage().getContent().trim();
     }
 
+    public RecipeStepDetailDto parseRecipeSteps(Long recipeId, int stepNumber) {
+        String systemPrompt = """
+      You are an AI that converts a single Korean recipe step description into a JSON object.
+      ◆ Input: a Korean sentence describing one cooking step.
+      ◆ Output: pure JSON only, with exactly these fields:
+        - "stepNumber": the original step number (integer)
+        - "action": a short English verb phrase describing the action
+        - "ingredients": a JSON array of English ingredient names mentioned in the description,
+          with adjectives removed and excluding "water"
+      No other keys or commentary.
+      """;
+
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
+
+        RecipeStep recipeStep = recipeStepRepository.findByRecipeAndStepNumber(recipe, stepNumber)
+                .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
+
+        RecipeStepDetailDto dto = new RecipeStepDetailDto(recipeStep.getStepNumber(),
+                recipeStep.getAction(), recipeStep.getDescription(), recipeStep.getIngredients());
+
+        List<Message> messages = List.of(
+                new Message("system", systemPrompt),
+                new Message("user", dto.getDescription())
+        );
+        ChatGPTRequest req = new ChatGPTRequest(model, messages);
+        ChatGPTResponse resp = restTemplate.postForObject(apiUrl, req, ChatGPTResponse.class);
+        String content = resp.getChoices().get(0).getMessage().getContent().trim();
+
+        try {
+            JsonNode root = objectMapper.readTree(content);
+            int num = root.path("stepNumber").asInt(dto.getStepNumber());
+            String action = root.path("action").asText();
+            List<String> ingredients = new ArrayList<>();
+
+            for (JsonNode ing : root.path("ingredients")) {
+                ingredients.add(ing.asText());
+            }
+
+            return RecipeStepDetailDto.of(num, action, dto.getDescription(), ingredients);
+
+        } catch (JsonProcessingException e) {
+            throw BaseException.from(ErrorCode.GPT_RESPONSE_PARSING_FAILED);
+        }
+    }
+
+    public String parseRecipeStepsTest(Long recipeId, int stepNumber) {
+        String systemPrompt = """
+        You are an AI that converts a single Korean recipe step description into a JSON object.
+        ◆ Input: a Korean sentence describing one cooking step.
+        ◆ Output: pure JSON only, with exactly these fields:
+            - "stepNumber": the original step number (integer)
+            - "action": a short English verb phrase describing the action
+            - "ingredients": a JSON array of English ingredient names mentioned in the description,
+              with adjectives removed and excluding "water"
+          No other keys or commentary.
+          """;
+
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
+
+        RecipeStep recipeStep = recipeStepRepository.findByRecipeAndStepNumber(recipe, stepNumber)
+                .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
+
+        RecipeStepDetailDto dto = new RecipeStepDetailDto(recipeStep.getStepNumber(),
+                recipeStep.getAction(), recipeStep.getDescription(), recipeStep.getIngredients());
+
+        List<Message> messages = List.of(
+                new Message("system", systemPrompt),
+                new Message("user", dto.getDescription())
+        );
+        ChatGPTRequest req = new ChatGPTRequest(model, messages);
+        ChatGPTResponse resp = restTemplate.postForObject(apiUrl, req, ChatGPTResponse.class);
+        String content = resp.getChoices().get(0).getMessage().getContent().trim();
+        return content;
+    }
 }
 
