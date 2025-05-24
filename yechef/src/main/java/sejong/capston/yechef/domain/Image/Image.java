@@ -15,6 +15,8 @@ public class Image {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Lob
+  @Column(length = 2048)
   private String s3Url;
   private String s3Key; // ← 키는 동적으로 외부에서 생성해서 주입해야 함
 
