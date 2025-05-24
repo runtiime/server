@@ -22,7 +22,7 @@ public class OcrClient {
 
   public String extractText(MultipartFile imageFile) {
     MultipartBodyBuilder builder = new MultipartBodyBuilder();
-    builder.part("file", imageFile.getResource());
+    builder.part("image", imageFile.getResource());
 
     return webClient.post()
         .uri("/api/ocr")
