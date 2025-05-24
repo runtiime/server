@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
+import sejong.capston.yechef.domain.RecipeSteps.dto.RecipeStepDetailDto;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class RecipeParseResultDto {
     private String text;    // 음식 한 줄 설명
     private int servings;
     private List<IngredientDto> ingredients;
-    private List<RecipeStepDto> steps;
+    private List<RecipeStepDetailDto> steps;
 
     private String sourceImageUrl;
 
@@ -26,7 +27,7 @@ public class RecipeParseResultDto {
         String text,
         int servings,
         List<IngredientDto> ingredients,
-        List<RecipeStepDto> steps
+        List<RecipeStepDetailDto> steps
     ) {
         this.title = title;
         this.text = text;

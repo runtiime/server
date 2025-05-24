@@ -3,13 +3,11 @@ package sejong.capston.yechef.domain.Gpt.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
+import sejong.capston.yechef.domain.RecipeSteps.dto.RecipeStepDetailDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,4 +29,11 @@ public class GptApiController {
     public RecipeParseResultDto parseRecipe(@RequestParam("recipe") String rawRecipe) {
         return gptService.parseRecipe(rawRecipe);
     }
+
+    @GetMapping("/parseStep/{recipeId}/{stepNumber}")
+    public RecipeStepDetailDto parseRecipeSteps (
+            @PathVariable Long recipeId, @PathVariable int stepNumber) {
+        return gptService.parseRecipeSteps(recipeId, stepNumber);
+    }
+
 }
