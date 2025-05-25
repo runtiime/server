@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 
@@ -53,7 +54,7 @@ public class OcrClient {
     return webClient.post()
         .uri("/api/ocr")
         .contentType(MediaType.MULTIPART_FORM_DATA)
-        .bodyValue(builder.build())
+        .body(BodyInserters.fromMultipartData(builder.build()))
         .retrieve()
         .bodyToMono(new ParameterizedTypeReference<Map<String, List<String>>>() {})
         .map(map -> String.join("\n", map.getOrDefault("texts", List.of())))

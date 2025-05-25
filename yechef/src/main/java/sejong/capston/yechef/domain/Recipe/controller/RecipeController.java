@@ -48,7 +48,7 @@ public class RecipeController {
 //    DetailRecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
 //    return ResponseEntity.ok(result);
 //  }
-@PostMapping("/ocr/create")
+@PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 public ResponseEntity<OcrRecipeResultDto> createRecipeFromImage(
     @RequestParam("memberId") Long memberId,
     @RequestPart("image") MultipartFile imageFile) {
