@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import sejong.capston.yechef.domain.Gpt.dto.IngredientDto;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
 import sejong.capston.yechef.domain.Image.Image;
 import sejong.capston.yechef.domain.Image.repository.ImageRepository;
 import sejong.capston.yechef.domain.Image.service.ImageService;
+import sejong.capston.yechef.domain.Ingredient.Ingredient;
 import sejong.capston.yechef.domain.Ingredient.service.IngredientService;
 import sejong.capston.yechef.domain.Member.Member;
 import sejong.capston.yechef.domain.Member.repository.MemberRepository;
@@ -24,6 +26,8 @@ import sejong.capston.yechef.domain.Recipe.dto.OcrRecipeResultDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
+import sejong.capston.yechef.domain.RecipeSteps.RecipeStep;
+import sejong.capston.yechef.domain.RecipeSteps.dto.RecipeStepDetailDto;
 import sejong.capston.yechef.domain.RecipeSteps.service.RecipeStepService;
 import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
@@ -212,6 +216,17 @@ public class RecipeService {
         dto.getText(),
         image // 저장된 이미지 그대로 사용
     );
+
+    // DTO → 엔티티 변환 시
+    for (IngredientDto ingredientDto : dto.getIngredients()) {
+      Ingredient ing = Ingredient.of(ingredientDto.getName(), ingredientDto.getQuantity(), recipe);
+      recipe.addIngredient(ing);
+    }
+    for (RecipeStepDetailDto stepDto : dto.getSteps()) {
+      RecipeStep step = RecipeStep.of(stepDto.getStepNumber(), stepDto.getAction(), stepDto.getIngredients(),
+              stepDto.getDescription(), recipe);
+      recipe.addStep(step);
+    }
 
     recipeRepository.save(recipe);
     memberRecipeRepository.save(MemberRecipe.of(member, recipe));
