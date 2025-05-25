@@ -48,7 +48,7 @@ public class GptService {
             …
           ],
           "steps": [
-            { "stepNumber": 1, "action": "<단일 행위>", "description": "<상세 설명>" },
+            { "stepNumber": 1, "action": "<단일 행위>", "ingredients": <단계에쓰인재료들>, "description": "<상세 설명>" },
             …
           ]
         }
@@ -60,6 +60,8 @@ public class GptService {
         4. 출력은 반드시 JSON만 포함되도록 하세요. 설명이나 마크다운 블록 없이 반환합니다.
         5. steps 배열의 각 항목에는 "stepNumber" 필드가 반드시 있어야 하며, 그 값은 **1부터 시작해 1씩 순차 증가**해야 합니다. 
         절대로 0이거나 중복되면 안 됩니다. (예: 1, 2, 3, …)
+        6. steps 내부 키 "ingredients": 해당 레시피 단계에 설명(description)에 언급된 재료명만 한국어로 배열에 담아 반환  
+             (수식어 제거, "물" 제외)
         """;
 
         // GPT 호출
@@ -95,9 +97,17 @@ public class GptService {
             List<RecipeStepDetailDto> steps = new ArrayList<>();
             int index = 1;
             for (JsonNode stepNode : root.path("steps")) {
+
+                // 단계별 재료(문자열 리스트) 추출
+                List<String> stepIngredients = new ArrayList<>();
+                for (JsonNode ing : stepNode.path("ingredients")) {
+                    stepIngredients.add(ing.asText());
+                }
+
                 steps.add(RecipeStepDetailDto.builder()
-                        .stepNumber(stepNode.path("order").asInt(index++))
+                        .stepNumber(stepNode.path("stepNumber").asInt(index++))
                         .action(stepNode.path("action").asText(""))
+                        .ingredients(stepIngredients)
                         .description(stepNode.path("description").asText(""))
                         .build()
                 );
