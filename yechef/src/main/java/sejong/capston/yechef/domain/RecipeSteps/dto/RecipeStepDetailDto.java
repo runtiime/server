@@ -16,16 +16,12 @@ public class RecipeStepDetailDto {
     private String description; // “떡 300g을 먹기 좋은 크기로 썬다”
     private List<String> ingredients;
 
-    public RecipeStepDetailDto(int stepNumber, String action, String description) {
-        this.stepNumber = stepNumber;
-        this.action = action;
-        this.description = description;
-    }
-
     public static RecipeStepDetailDto from(RecipeStep step) {
         return RecipeStepDetailDto.builder()
                 .stepNumber(step.getStepNumber())
                 .description(step.getDescription())
+                .action(step.getAction())
+                .ingredients(step.getIngredients())
                 .build();
     }
 

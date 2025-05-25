@@ -48,6 +48,18 @@ public class Ingredient extends BaseEntity {
 
     public static Ingredient of(
             String originalName,
+            String originalAmount,
+            Recipe recipe
+    ) {
+        return Ingredient.builder()
+                .originalName(originalName)
+                .originalAmount(originalAmount)
+                .recipe(recipe)
+                .build();
+    }
+
+    public static Ingredient of(
+            String originalName,
             String alternativeName,
             String originalAmount,
             String oneServingAmount,

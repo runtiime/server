@@ -65,6 +65,16 @@ public class Recipe extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Image sourceImage;
 
+    public void addIngredient(Ingredient ing) {
+        ingredients.add(ing);
+        ing.setRecipe(this);
+    }
+
+    public void addStep(RecipeStep step) {
+        recipeSteps.add(step);
+        step.setRecipe(this);
+    }
+
     @Builder
     public Recipe(
             Long id,

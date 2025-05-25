@@ -48,7 +48,7 @@ public class GptService {
             …
           ],
           "steps": [
-            { "stepNumber": 1, "action": "<단일 행위>", "description": "<상세 설명>" },
+            { "stepNumber": 1, "action": "<단일 행위>", "ingredients": <단계에쓰인재료들>, "description": "<상세 설명>" },
             …
           ]
         }
@@ -60,6 +60,8 @@ public class GptService {
         4. 출력은 반드시 JSON만 포함되도록 하세요. 설명이나 마크다운 블록 없이 반환합니다.
         5. steps 배열의 각 항목에는 "stepNumber" 필드가 반드시 있어야 하며, 그 값은 **1부터 시작해 1씩 순차 증가**해야 합니다. 
         절대로 0이거나 중복되면 안 됩니다. (예: 1, 2, 3, …)
+        6. steps 내부 키 "ingredients": 해당 레시피 단계에 설명(description)에 언급된 재료명만 한국어로 배열에 담아 반환  
+             (수식어 제거, "물" 제외)
         """;
 
         // GPT 호출
@@ -95,9 +97,17 @@ public class GptService {
             List<RecipeStepDetailDto> steps = new ArrayList<>();
             int index = 1;
             for (JsonNode stepNode : root.path("steps")) {
+
+                // 단계별 재료(문자열 리스트) 추출
+                List<String> stepIngredients = new ArrayList<>();
+                for (JsonNode ing : stepNode.path("ingredients")) {
+                    stepIngredients.add(ing.asText());
+                }
+
                 steps.add(RecipeStepDetailDto.builder()
-                        .stepNumber(stepNode.path("order").asInt(index++))
+                        .stepNumber(stepNode.path("stepNumber").asInt(index++))
                         .action(stepNode.path("action").asText(""))
+                        .ingredients(stepIngredients)
                         .description(stepNode.path("description").asText(""))
                         .build()
                 );
@@ -123,15 +133,15 @@ public class GptService {
 
     public RecipeStepDetailDto parseRecipeSteps(Long recipeId, int stepNumber) {
         String systemPrompt = """
-      You are an AI that converts a single Korean recipe step description into a JSON object.
-      ◆ Input: a Korean sentence describing one cooking step.
-      ◆ Output: pure JSON only, with exactly these fields:
-        - "stepNumber": the original step number (integer)
-        - "action": a short English verb phrase describing the action
-        - "ingredients": a JSON array of English ingredient names mentioned in the description,
-          with adjectives removed and excluding "water"
-      No other keys or commentary.
-      """;
+        당신은 단일 한국어 조리 단계 설명을 받아 JSON 객체로 변환하는 AI입니다.
+        ◆ 입력: 한국어로 된 하나의 조리 단계 설명 문장
+        ◆ 출력: 순수 JSON만 반환하며, 반드시 아래 세 가지 필드만 포함해야 합니다.
+          - "stepNumber": 원래 단계 번호 (정수)
+          - "action": 해당 조리 동작을 짧은 한국어 동사구(예: "썰기", "볶기")로 표현
+          - "ingredients": 설명에 언급된 재료명만 한국어로 배열에 담아 반환  
+             (수식어 제거, "물" 제외)
+        그 외의 키, 주석, 설명 문구는 절대 포함하지 마세요!
+        """;
 
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
@@ -169,15 +179,16 @@ public class GptService {
 
     public String parseRecipeStepsTest(Long recipeId, int stepNumber) {
         String systemPrompt = """
-        You are an AI that converts a single Korean recipe step description into a JSON object.
-        ◆ Input: a Korean sentence describing one cooking step.
-        ◆ Output: pure JSON only, with exactly these fields:
-            - "stepNumber": the original step number (integer)
-            - "action": a short English verb phrase describing the action
-            - "ingredients": a JSON array of English ingredient names mentioned in the description,
-              with adjectives removed and excluding "water"
-          No other keys or commentary.
-          """;
+        당신은 단일 한국어 조리 단계 설명을 받아 JSON 객체로 변환하는 AI입니다.
+        ◆ 입력: 한국어로 된 하나의 조리 단계 설명 문장
+        ◆ 출력: 순수 JSON만 반환하며, 반드시 아래 세 가지 필드만 포함해야 합니다.
+          - "stepNumber": 원래 단계 번호 (정수)
+          - "action": 해당 조리 동작을 짧은 한국어 동사구(예: "썰기", "볶기")로 표현
+          - "ingredients": 설명에 언급된 재료명만 한국어로 배열에 담아 반환  
+             (수식어 제거, "물" 제외)
+        그 외의 키, 주석, 설명 문구는 절대 포함하지 마세요!
+        """;
+
 
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
