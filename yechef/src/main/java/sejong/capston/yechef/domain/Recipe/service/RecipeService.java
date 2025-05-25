@@ -20,6 +20,7 @@ import sejong.capston.yechef.domain.MemberRecipe.repository.MemberRecipeReposito
 import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.ai.OcrClient;
 import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
+import sejong.capston.yechef.domain.Recipe.dto.OcrRecipeResultDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
@@ -182,7 +183,7 @@ public class RecipeService {
   }
 
   @Transactional
-  public DetailRecipeDto createRecipeFromImage(Long memberId, MultipartFile imageFile) {
+  public OcrRecipeResultDto createRecipeFromImage(Long memberId, MultipartFile imageFile) {
     // 1. 이미지 저장
     Image image = imageService.saveImage(imageFile);
 
@@ -195,7 +196,7 @@ public class RecipeService {
 
     // 4. 레시피 생성
     Recipe recipe = createFromOcr(memberId, dto, image);
-    return DetailRecipeDto.from(recipe);
+    return OcrRecipeResultDto.from(recipe, rawText);
   }
 
 

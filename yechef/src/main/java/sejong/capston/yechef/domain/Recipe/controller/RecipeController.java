@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
+import sejong.capston.yechef.domain.Recipe.dto.OcrRecipeResultDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
 import sejong.capston.yechef.domain.Recipe.service.RecipeService;
 
@@ -40,13 +41,22 @@ public class RecipeController {
         .body(result);
   }
 
-  @PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<DetailRecipeDto> createRecipeFromImage(
-      @RequestParam("memberId") Long memberId,
-      @RequestPart("image") MultipartFile imageFile) {
-    DetailRecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
-    return ResponseEntity.ok(result);
-  }
+//  @PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//  public ResponseEntity<DetailRecipeDto> createRecipeFromImage(
+//      @RequestParam("memberId") Long memberId,
+//      @RequestPart("image") MultipartFile imageFile) {
+//    DetailRecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
+//    return ResponseEntity.ok(result);
+//  }
+@PostMapping("/ocr/create")
+public ResponseEntity<OcrRecipeResultDto> createRecipeFromImage(
+    @RequestParam("memberId") Long memberId,
+    @RequestPart("image") MultipartFile imageFile) {
+
+  OcrRecipeResultDto result = recipeService.createRecipeFromImage(memberId, imageFile);
+
+  return ResponseEntity.ok(result);
+}
 
   // 상세 조회
   @GetMapping("/{recipeId}")
