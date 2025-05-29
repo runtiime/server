@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
 
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
-import sejong.capston.yechef.domain.Recipe.Recipe;
 import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.OcrRecipeResultDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
@@ -41,31 +40,40 @@ public class RecipeController {
         .body(result);
   }
 
-//  @PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  //  @PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 //  public ResponseEntity<DetailRecipeDto> createRecipeFromImage(
 //      @RequestParam("memberId") Long memberId,
 //      @RequestPart("image") MultipartFile imageFile) {
 //    DetailRecipeDto result = recipeService.createRecipeFromImage(memberId, imageFile);
 //    return ResponseEntity.ok(result);
 //  }
-@PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<OcrRecipeResultDto> createRecipeFromImage(
-    @RequestParam("memberId") Long memberId,
-    @RequestPart("image") MultipartFile imageFile) {
+  @PostMapping(value = "/ocr/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<OcrRecipeResultDto> createRecipeFromImage(
+      @RequestParam("memberId") Long memberId,
+      @RequestPart("image") MultipartFile imageFile) {
 
-  OcrRecipeResultDto result = recipeService.createRecipeFromImage(memberId, imageFile);
+    OcrRecipeResultDto result = recipeService.createRecipeFromImage(memberId, imageFile);
 
-  return ResponseEntity.ok(result);
-}
+    return ResponseEntity.ok(result);
+  }
 
   // 상세 조회
   @GetMapping("/{recipeId}")
   public ResponseEntity<DetailRecipeDto> getRecipe(
-      @Parameter(description = "조회할 레시피 ID", required = true)
-      @PathVariable("recipeId") Long recipeId
+      @PathVariable("recipeId") Long recipeId,
+      @RequestParam(name = "targetServings", required = false) Integer targetServings
   ) {
-    return ResponseEntity.ok(recipeService.getRecipe(recipeId));
+    DetailRecipeDto dto;
+    if (targetServings != null) {
+      // targetServings이 지정됐으면 스케일된 버전
+      dto = recipeService.getScaledRecipe(recipeId, targetServings);
+    } else {
+      // 지정이 없으면 기존 로직
+      dto = recipeService.getRecipe(recipeId);
+    }
+    return ResponseEntity.ok(dto);
   }
+
 
   // 삭제
   @DeleteMapping("/members/{memberId}/recipes/{recipeId}")
