@@ -137,7 +137,9 @@ public class RecipeProgressService {
     - "PREVIOUS": 이전 단계로 이동
     - "REPEAT": 다시 설명
     - "EXPLAIN: <설명>": 보조 설명
-    - "SUBSTITUTE: <기존재료> → <대체재료>": 재료 변경
+    - "SUBSTITUTE: <기존재료> → <대체재료>": 요청된 대체가 가능한지 먼저 판단하고,
+       • 가능하면 변경된 조리 과정을 안내
+       • 불가능하면 이유를 설명
     """.formatted(stepDescription, userInput, formattedIngredients);
   }
 }
