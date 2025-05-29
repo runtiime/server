@@ -31,6 +31,7 @@ public enum ErrorCode {
     NO_RECIPE_INFO_OF_LIKE("RCP-0002", "레시피 좋아요 정보가 없습니다.", ErrorDisplayType.POPUP),
     NOT_EXIST_THIS_STEP("RCP-0003", "레시피 해당 단계가 존재하지 않습니다.", ErrorDisplayType.POPUP),
     RECIPE_SAVE_FAILED("RCP-0004", "레시피 저장 실패", ErrorDisplayType.POPUP),
+    RECIPE_INVALID_SERVINGS("RCP-0005", "인분 수는 1 이상 10 이하로만 설정 가능합니다.", ErrorDisplayType.POPUP),
 
     // memberRecipe
     MEMBER_RECIPE_NOT_FOUND("MRP-0000", "멤버레시피가 존재하지 않습니다.", ErrorDisplayType.POPUP),
