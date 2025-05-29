@@ -1,14 +1,20 @@
 package sejong.capston.yechef.domain.Recipe.service;
 
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import sejong.capston.yechef.domain.Gpt.dto.IngredientDto;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
+import sejong.capston.yechef.domain.Image.Dto.ImageDto;
 import sejong.capston.yechef.domain.Image.Image;
 import sejong.capston.yechef.domain.Image.repository.ImageRepository;
 import sejong.capston.yechef.domain.Image.service.ImageService;
@@ -23,6 +29,8 @@ import sejong.capston.yechef.domain.Recipe.ai.OcrClient;
 import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.OcrRecipeResultDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
+import sejong.capston.yechef.domain.Recipe.dto.RecipeIngredientDto;
+import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
 import sejong.capston.yechef.domain.RecipeSteps.RecipeStep;
 import sejong.capston.yechef.domain.RecipeSteps.service.RecipeStepService;
@@ -240,6 +248,110 @@ public class RecipeService {
     imageService.generateAndSaveThumbnail(recipe.getId());
 
     return recipe;
+  }
+
+  public DetailRecipeDto getScaledRecipe(Long recipeId, int targetServings) {
+    Recipe recipe = recipeRepository.findById(recipeId)
+        .orElseThrow(() -> BaseException.from(ErrorCode.RECIPE_NOT_EXIST));
+
+    double ratio = (double) targetServings / recipe.getServings();
+    if (targetServings < 1 || targetServings > 10) {
+      throw BaseException.from(ErrorCode.RECIPE_INVALID_SERVINGS);
+    }
+
+    List<RecipeIngredientDto> scaledIngs = recipe.getIngredients().stream()
+        .map(ing -> {
+          String scaled = scaleAmount(ing.getOriginalAmount(), ratio);
+          return RecipeIngredientDto.of(
+              ing.getOriginalName(),
+              ing.getOriginalAmount(),
+              scaled
+          );
+        })
+        .collect(Collectors.toList());
+
+    List<RecipeStepDto> steps = recipe.getRecipeSteps().stream()
+        .map(step -> {
+          String scaledDesc = scaleAllNumbers(step.getDescription(), ratio);
+          return RecipeStepDto.builder()
+              .stepNumber(step.getStepNumber())
+              .action(step.getAction())
+              .ingredients(step.getIngredients())
+              .description(scaledDesc)
+              .build();
+        })
+        .collect(Collectors.toList());
+
+    return DetailRecipeDto.builder()
+        .id(recipe.getId())
+        .title(recipe.getTitle())
+        .likeCount(recipe.getLikeCount())
+        .author(recipe.getAuthor())
+        .ranking(recipe.getRanking())
+        .servings(targetServings)
+        .text(recipe.getText())
+        .recipeType(recipe.getRecipeType())
+        .isUpdated(recipe.isUpdated())
+        .ingredients(scaledIngs)
+        .recipeSteps(steps)
+        .thumbnailImage(ImageDto.from(recipe.getThumbnailImage()))
+        .sourceImage(ImageDto.from(recipe.getSourceImage()))
+        .build();
+  }
+
+  private String scaleAmount(String original, double ratio) {
+    Matcher m = Pattern.compile("^(\\d+(?:\\.\\d+)?)(.*)$").matcher(original);
+    if (!m.matches()) {
+      return original;
+    }
+    BigDecimal value = new BigDecimal(m.group(1))
+        .multiply(BigDecimal.valueOf(ratio))
+        .setScale(2, RoundingMode.HALF_UP);
+    String num = value.stripTrailingZeros().toPlainString();
+    return num + m.group(2);
+  }
+
+  private String scaleAllNumbers(String text, double ratio) {
+    Pattern numberPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)");
+    Matcher m = numberPattern.matcher(text);
+    StringBuffer sb = new StringBuffer();
+
+    while (m.find()) {
+      String numStr = m.group(1);
+      int posAfterNum = m.end(1);
+
+      // 숫자 다음에 오는 공백을 모두 건너뛴 뒤 실제 문자를 검사
+      int idx = posAfterNum;
+      while (idx < text.length() && Character.isWhitespace(text.charAt(idx))) {
+        idx++;
+      }
+
+      boolean isTimeUnit = false;
+      if (idx < text.length()) {
+        char c = text.charAt(idx);
+        if (c == '분' || c == '초') {
+          isTimeUnit = true;
+        } else if (text.startsWith("시간", idx)) {
+          isTimeUnit = true;
+        }
+      }
+
+      String replacement;
+      if (isTimeUnit) {
+        // 시간 단위 숫자: 변경 없이 그대로
+        replacement = numStr;
+      } else {
+        // 재료량 등은 스케일 적용
+        BigDecimal scaled = new BigDecimal(numStr)
+            .multiply(BigDecimal.valueOf(ratio))
+            .setScale(2, RoundingMode.HALF_UP);
+        replacement = scaled.stripTrailingZeros().toPlainString();
+      }
+
+      m.appendReplacement(sb, replacement);
+    }
+    m.appendTail(sb);
+    return sb.toString();
   }
 
 
