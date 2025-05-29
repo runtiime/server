@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class DetailRecipeDto {
+
   private Long id;
   private String title;
   private int likeCount;
@@ -26,7 +27,7 @@ public class DetailRecipeDto {
   private Recipe.RecipeType recipeType;
   private boolean isUpdated;
 
-  private List<IngredientDto> ingredients;
+  private List<RecipeIngredientDto> ingredients;
   private List<RecipeStepDto> recipeSteps;
 
   private ImageDto thumbnailImage;
@@ -45,9 +46,14 @@ public class DetailRecipeDto {
         .isUpdated(recipe.isUpdated())
         .ingredients(recipe.getIngredients() != null
             ? recipe.getIngredients().stream()
-            .map(IngredientDto::from)
+            .map(ing -> RecipeIngredientDto.of(
+                ing.getOriginalName(),
+                ing.getOriginalAmount(),
+                ing.getOriginalAmount()   // 원본 조회 시엔 scaled=original
+            ))
             .collect(Collectors.toList())
             : null)
+
         .recipeSteps(recipe.getRecipeSteps() != null
             ? recipe.getRecipeSteps().stream()
             .map(RecipeStepDto::from)
@@ -61,7 +67,6 @@ public class DetailRecipeDto {
             : null)
         .build();
   }
-
 
 
 }
