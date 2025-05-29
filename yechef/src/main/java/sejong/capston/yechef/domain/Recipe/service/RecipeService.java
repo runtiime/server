@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import sejong.capston.yechef.domain.Gpt.dto.IngredientDto;
 import sejong.capston.yechef.domain.Gpt.dto.RecipeParseResultDto;
 import sejong.capston.yechef.domain.Gpt.service.GptService;
 import sejong.capston.yechef.domain.Image.Image;
@@ -24,10 +23,8 @@ import sejong.capston.yechef.domain.Recipe.ai.OcrClient;
 import sejong.capston.yechef.domain.Recipe.dto.DetailRecipeDto;
 import sejong.capston.yechef.domain.Recipe.dto.OcrRecipeResultDto;
 import sejong.capston.yechef.domain.Recipe.dto.RecipeDto;
-import sejong.capston.yechef.domain.Recipe.dto.RecipeStepDto;
 import sejong.capston.yechef.domain.Recipe.repository.RecipeRepository;
 import sejong.capston.yechef.domain.RecipeSteps.RecipeStep;
-import sejong.capston.yechef.domain.RecipeSteps.dto.RecipeStepDetailDto;
 import sejong.capston.yechef.domain.RecipeSteps.service.RecipeStepService;
 import sejong.capston.yechef.global.exception.BaseException;
 import sejong.capston.yechef.global.exception.error.ErrorCode;
@@ -204,6 +201,7 @@ public class RecipeService {
   }
 
 
+  @Transactional
   public Recipe createFromOcr(Long memberId, RecipeParseResultDto dto, Image image) {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> BaseException.from(ErrorCode.MEMBER_NOT_FOUND));
@@ -214,27 +212,35 @@ public class RecipeService {
         Recipe.RecipeType.PRIVATE,
         dto.getServings(),
         dto.getText(),
-        image // 저장된 이미지 그대로 사용
+        image
     );
 
-    // DTO → 엔티티 변환 시
-    for (IngredientDto ingredientDto : dto.getIngredients()) {
-      Ingredient ing = Ingredient.of(ingredientDto.getName(), ingredientDto.getQuantity(), recipe);
+    dto.getIngredients().forEach(ingDto -> {
+      Ingredient ing = Ingredient.of(
+          ingDto.getName(),
+          ingDto.getQuantity(),
+          recipe
+      );
       recipe.addIngredient(ing);
-    }
-    for (RecipeStepDetailDto stepDto : dto.getSteps()) {
-      RecipeStep step = RecipeStep.of(stepDto.getStepNumber(), stepDto.getAction(), stepDto.getIngredients(),
-              stepDto.getDescription(), recipe);
+    });
+
+    dto.getSteps().forEach(stepDto -> {
+      RecipeStep step = RecipeStep.of(
+          stepDto.getStepNumber(),
+          stepDto.getAction(),
+          stepDto.getIngredients(),
+          stepDto.getDescription(),
+          recipe
+      );
       recipe.addStep(step);
-    }
+    });
 
     recipeRepository.save(recipe);
     memberRecipeRepository.save(MemberRecipe.of(member, recipe));
-    ingredientService.saveIngredients(dto.getIngredients(), recipe);
-    recipeStepService.saveSteps(dto.getSteps(), recipe);
     imageService.generateAndSaveThumbnail(recipe.getId());
 
     return recipe;
   }
+
 
 }
