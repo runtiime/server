@@ -14,24 +14,17 @@
 ---
 
 ## 디렉토리 구조
+```
 server/yechef/
-
 ├─ gradle/wrapper/
-
 ├─ src/
-
 ├─ Dockerfile
-
 ├─ docker-compose.yml
-
 ├─ build.gradle
-
 ├─ gradlew
-
 ├─ gradlew.bat
-
 └─ settings.gradle
-
+```
 ---
 
 ## 실행 방법 (로컬/서버 공통)
