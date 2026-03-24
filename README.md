@@ -61,7 +61,7 @@
 
 ---
 
-## 담당 구현
+## 구현 내용
 
 **인프라 · 배포**
 - Dockerfile + Docker Compose로 백엔드 / AI / DB / S3 환경 통합 구성
