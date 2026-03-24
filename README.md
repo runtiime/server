@@ -1,4 +1,4 @@
-<img width="1152" height="538" alt="image03" src="https://github.com/user-attachments/assets/5ab28e67-c911-4019-9543-19f7370f98a3" /># Ye! Chef — Backend Server
+# Ye! Chef — Backend Server
 
 > 자취생을 위한 AI 기반 핸즈프리 요리 보조 앱의 Spring Boot 백엔드 서버입니다.  
 > 레시피 사진을 올리면 OCR + GPT로 단계를 자동 구조화하고, 카메라·음성 인식으로 터치 없이 요리를 안내합니다.
@@ -14,11 +14,7 @@
 ## 기술 스택
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat&logo=spring<img width="696" height="561" alt="image02" src="https://github.com/user-attachments/assets/be889041-452d-47a1-a175-b34d71522b35" />
-<img width="938" height="558" alt="image01" src="https://github.com/user-attachments/assets/c6ac77ec-9c6b-4bc3-a071-b1c17ee60350" />
-<img width="1006" height="553" alt="image05" src="https://github.com/user-attachments/assets/4a3cb62f-48a4-46a1-be49-110cb42ea1b0" />
-<img width="984" height="511" alt="image04" src="https://github.com/user-attachments/assets/0faed02e-216c-4942-b6f5-dcfa4f58e578" />
-boot&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat&logo=springboot&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL_8.0-4479A1?style=flat&logo=mysql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
